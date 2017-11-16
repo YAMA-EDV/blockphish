@@ -12,7 +12,6 @@
 import re
 import certstream
 import tqdm
-import entropy
 from tld import get_tld
 from Levenshtein import distance
 from termcolor import colored, cprint
@@ -63,9 +62,6 @@ def score_domain(domain):
     for word in keywords.keys():
         if word in domain:
             score += keywords[word]
-
-    # Higer entropy is kind of suspicious
-    score += int(round(entropy.shannon_entropy(domain)*50))
 
     # Testing Levenshtein distance for strong keywords (>= 70 points) (ie. paypol)
     for key in [k for (k,s) in keywords.items() if s >= 70]:
