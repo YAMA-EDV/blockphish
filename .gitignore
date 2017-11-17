@@ -43,3 +43,6 @@ tmtagsHistory
 
 #API key and creds
 .credentials
+
+#TLDS
+.tlds

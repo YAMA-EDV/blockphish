@@ -12,44 +12,55 @@
 import re
 import certstream
 import tqdm
-from tld import get_tld
-from Levenshtein import distance
+from tldextract import extract, TLDExtract
 from termcolor import colored, cprint
+from settings import watchlist, keywords, tlds
+from fuzzy_matching import fuzzy_matcher
 
-from suspicious import keywords, tlds
 
 log_suspicious = 'suspicious_domains.log'
 
 pbar = tqdm.tqdm(desc='certificate_update', unit='cert')
 
-def score_domain(domain):
-    """Score `domain`.
+def clean_domain(domain):
+    '''
+    Tidy up the domain for processing.
 
-    The highest score, the most probable `domain` is a phishing site.
+    :param domain: domain to clean
+    :return: cleaned up domain
+    '''
 
-    Args:
-        domain (str): the domain to check.
+    domain = domain.strip(".*").strip(".").strip().lower()
+    return domain
 
-    Returns:
-        int: the score of `domain`.
-    """
+def score_domain(domain, watchdomain, watch_keywords):
+    '''
+    The domain to be analysed compared with the watchdomain that we are monitoring.
+
+    :param domain: the domain of the newly registered cert.
+    :param watchdomain: the domain that we are monitoring
+    :return: the score of the domain in question.
+    '''
+    fuzzy = fuzzy_matcher()
+
+    domain = clean_domain(domain)
     score = 0
+
     for t in tlds:
         if domain.endswith(t):
             score += 20
 
-    # Remove initial '*.' for wildcard certificates bug
-    if domain.startswith('*.'):
-        domain = domain[2:]
+    #Fuzzy matching
+    score += fuzzy.score_domains(domain, watchdomain)
 
-    # Removing TLD to catch inner TLD in subdomain (ie. paypal.com.domain.com)
-    try:
-        res = get_tld(domain, as_object=True, fail_silently=True, fix_protocol=True)
-        domain = '.'.join([res.subdomain, res.domain])
-    except:
-        pass
-
-    words_in_domain = re.split("\W+", domain)
+    words_in_domain = split_domain_into_words(domain)
+    for key in watch_keywords:
+        if key in words_in_domain:
+            score+= 50
+        else:
+            fuzzy_keyword_score = fuzzy.score_keywords(words_in_domain, key)
+            if fuzzy_keyword_score > 50:
+                score+=50
 
     # Remove initial '*.' for wildcard certificates bug
     if domain.startswith('*.'):
@@ -58,28 +69,106 @@ def score_domain(domain):
         if words_in_domain[0] in ['com', 'net', 'org']:
             score += 10
 
-    # Testing keywords
-    for word in keywords.keys():
-        if word in domain:
-            score += keywords[word]
-
-    # Testing Levenshtein distance for strong keywords (>= 70 points) (ie. paypol)
-    for key in [k for (k,s) in keywords.items() if s >= 70]:
-        # Removing too generic keywords (ie. mail.domain.com)
-        for word in [w for w in words_in_domain if w not in ['email', 'mail', 'cloud']]:
-            if distance(str(word), str(key)) == 1:
-                score += 70
-
-    # Lots of '-' (ie. www.paypal-datacenter.com-acccount-alert.com)
-    if 'xn--' not in domain and domain.count('-') >= 4:
-        score += domain.count('-') * 3
-
-    # Deeply nested subdomains (ie. www.paypal.com.security.accountupdate.gq)
-    if domain.count('.') >= 3:
-        score += domain.count('.') * 3
+    #is the watch domain embedded in the new domain.
+        if watchdomain_in_domain(domain, watchdomain):
+            score+=100
 
     return score
 
+def split_domain_into_words(domain) :
+    '''
+    Split the domain into it words if possible, e.g. paypal-account.com -> ['paypal', 'account']
+    :param domain:
+    :return:
+    '''
+    #Remove the tld
+    tld = extract(domain)
+    domain = domain.replace(tld.suffix, "")
+
+
+    #Get list of TLDs
+    extract_object = TLDExtract()
+    all_tlds = extract_object._get_tld_extractor()
+    all_tlds = extract_object.tlds
+
+    for tld in all_tlds:
+        domain = domain.replace('.'+tld+'.', ".")
+
+    words = set()
+    current_word = ""
+    for char in domain:
+        if not char.isalnum():
+            words.add(current_word)
+            current_word = ""
+            continue
+        current_word += char
+    return sorted(list(words))
+
+def watchdomain_in_domain(new_domain, watchdomain):
+    '''
+    This function takes in the newly discovered domain and the domain that you are monitoring. It then determines whether
+    or not the registered domain is imitating the watchdomain for e.g. is paypal.com in paypal.com.malicious.com
+
+    :param new_domain: newly registered domain
+    :param watchdomain: domain that we are monitoring
+    :return: Boolean value reflecting whether the new_domain infringes on the watchdomain.
+    '''
+    is_subdomain_of_watchdomain = new_domain.endswith("."+watchdomain)
+    is_watchdomain = new_domain == watchdomain
+    if is_subdomain_of_watchdomain or is_watchdomain:
+        #Okay, this is actually the watchdomain.
+        return False
+
+    #Okay, if it's not *the* domain, does if have the domain somewhere in it?
+    if watchdomain in new_domain:
+        return True
+
+    #Nothing to see here.
+    else:
+        return False
+
+def handle_score_and_log(domain, watchdomain, score):
+    '''
+    Pass this to our various logging methods and decide if we should log them.
+    :param domain:
+    :param watchdomain:
+    :param score:
+    :return:
+    '''
+    #For now this is just logging to console, but google spreadsheets to come.
+    console_log(domain, watchdomain, score)
+
+
+def console_log(domain, watchdomain, score):
+    '''
+    This will handle the writing of suspicious domains to the CLI.
+
+    :param domain: The suspect domain
+    :param watchdomain: The domain it appears to have impostered
+    :param score: The score that our engine gave it.
+    :return: None
+    '''
+    pbar.update(1)
+    if score >= 100:
+        tqdm.tqdm.write(
+            "[!] Suspicious: "
+            "{} (score={}) flagged for {}".format(colored(domain, 'red', attrs=['underline', 'bold']), score, watchdomain))
+    elif score >= 90:
+        tqdm.tqdm.write(
+            "[!] Suspicious: "
+            "{} (score={}) flagged for {}".format(colored(domain, 'red', attrs=['underline']), score, watchdomain))
+    elif score >= 80:
+        tqdm.tqdm.write(
+            "[!] Likely    : "
+            "{} (score={}) flagged for {}".format(colored(domain, 'yellow', attrs=['underline']), score, watchdomain))
+    elif score >= 65:
+        tqdm.tqdm.write(
+            "[+] Potential : "
+            "{} (score={}) flagged for {}".format(colored(domain, attrs=['underline']), score, watchdomain))
+
+    if score >= 75:
+        with open(log_suspicious, 'a') as f:
+            f.write("{}\n".format(domain))
 
 def callback(message, context):
     """Callback handler for certstream events."""
@@ -88,35 +177,16 @@ def callback(message, context):
 
     if message['message_type'] == "certificate_update":
         all_domains = message['data']['leaf_cert']['all_domains']
-
+        #Cycle through all of our domains found in the cert
         for domain in all_domains:
-            pbar.update(1)
-            score = score_domain(domain.lower())
 
-            # If issued from a free CA = more suspicious
-            if "Let's Encrypt" in message['data']['chain'][0]['subject']['aggregated']:
-                score += 10
+            #Cycle through each of the domains that we're watching for.
+            for watchdomain in watchlist:
+                score = score_domain(domain.lower(), watchdomain, keywords)
 
-            if score >= 100:
-                tqdm.tqdm.write(
-                    "[!] Suspicious: "
-                    "{} (score={})".format(colored(domain, 'red', attrs=['underline', 'bold']), score))
-            elif score >= 90:
-                tqdm.tqdm.write(
-                    "[!] Suspicious: "
-                    "{} (score={})".format(colored(domain, 'red', attrs=['underline']), score))
-            elif score >= 80:
-                tqdm.tqdm.write(
-                    "[!] Likely    : "
-                    "{} (score={})".format(colored(domain, 'yellow', attrs=['underline']), score))
-            elif score >= 65:
-                tqdm.tqdm.write(
-                    "[+] Potential : "
-                    "{} (score={})".format(colored(domain, attrs=['underline']), score))
+                #If it's issued by free CA, more suspect.
+                if "Let's Encrypt" in message['data']['chain'][0]['subject']['aggregated']:
+                    score += 15
+                handle_score_and_log(domain, watchdomain, score)
 
-            if score >= 75:
-                with open(log_suspicious, 'a') as f:
-                    f.write("{}\n".format(domain))
-
-
-certstream.listen_for_events(callback)
+#certstream.listen_for_events(callback)

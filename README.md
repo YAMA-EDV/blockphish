@@ -27,6 +27,9 @@ $ ./catch_phishing.py
 
 ![Paypal Phishing](https://i.imgur.com/AK60EYz.png)
 
+### Thanks
+Thanks to @x0rz https://github.com/x0rz/phishing_catcher for the original inspiration.
+
 License
 ----
 GNU GPLv3
