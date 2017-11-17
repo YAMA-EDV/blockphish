@@ -12,11 +12,10 @@
 import re
 import certstream
 import tqdm
+import Levenshtein
 from tldextract import extract, TLDExtract
 from termcolor import colored, cprint
 from settings import watchlist, keywords, tlds
-from fuzzy_matching import fuzzy_matcher
-
 
 log_suspicious = 'suspicious_domains.log'
 

@@ -1,56 +1,32 @@
-from fuzzywuzzy import fuzz, process, StringMatcher
-import math
+
+import Levenshtein
+
 class fuzzy_matcher:
-    def score_keywords(self, domain_words, keyword):
+    def score_keywords(self, keywords, target):
         '''
+        This method uses a sliding window and the Levenshtein distance to determine if the keyword is found in any substrings of the target. e.g. it helps you recognize that 'paypol' is closely found in 'longpaypalstring'
 
-        :param domain:
-        :param keywords:
+        :param keywords: List of keywords to monitor for a given domain.
+        :param keywords: The potential phishing domain.
         :return:
         '''
-        keywords_matching_algs = [self._plain_levenshtein]
+        
         score = 0.0
-        for domain_word in domain_words:
-            for m in keywords_matching_algs:
-                score+=m(domain_word, keyword)
-        return (score/len(keywords_matching_algs)) * 0.8
 
-    def score_domains(self, domain, watchdomain):
-        '''
-        This method will take in the domain and watch domain and perform a series of fuzzy matches on it, returning an
-        overall score indicating the likelihood that it is some kind of clone.
+        for keyword in keywords:
+            # Find the shorter string
+            shorter,longer = (keyword,target) if len(keyword) < len(target) else (target,keyword)
 
-        :param domain: the domain to test
-        :param watchdomain: the safedomain that we are monitoring.
-        :return: score indicating likelihood of malicious
-        '''
-        domain_matching_algs = [self._plain_levenshtein]
-        score = 0.0
-        for m in domain_matching_algs:
-            score+=m(domain, watchdomain)
+            # Set the window length equal to the shorter string
+            window_length = len(shorter)
 
-        return (score/len(domain_matching_algs))*0.8
+            # Set the number of times to move the window
+            num_iterations = len(longer)-len(shorter)+1
 
-
-
-    def _plain_levenshtein(self, domain, watchdomain):
-        '''
-        This method takes in the two domains for comparison and returns the Levenshtein dist between them scored.
-        :param domain:
-        :param watchdomain:
-        :return:
-        '''
-        exponent = 1.1
-        dist = StringMatcher.distance(domain, watchdomain)
-        adjusted_dist = math.pow(dist, exponent)
-        max_len = math.pow(float(max(len(domain), len(watchdomain))), exponent)
-        if adjusted_dist == 0:
-            #Exact match, fwiw we return 0
-            return 0
-        else:
-            score = (1.0 - (adjusted_dist/max_len))*100
-            print ("Levenshtein is {} for {} {} ".format(score, domain, watchdomain))
-            return score
-
-    def _partial_ratio(self, domain, watchdomain):
-        fuzz.partial_ratio()
+            # Find the Levenshtein distance with the highest ratio (lowest distance)
+            for position in range(0, num_iterations):
+                window = longer[position:position+window_length]
+                result = Levenshtein.ratio(window, shorter)
+                if(result > score):
+                    score = result
+        return score
