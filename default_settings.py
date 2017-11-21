@@ -14,9 +14,11 @@ google_threshold = 75
 ####################
 
 #Domains to monitor
-watchlist ={
-        "myetherwallet.com" : {"myetherwallet" : 100, "myether" : 70},
-        "paypal.com" : {"paypal" : 90, "paypalcorp" : 50}
+watchlist = {
+        "myetherwallet.com" : 
+            {"myetherwallet" : 100, "myether" : 50},
+        "paypal.com" : 
+            {"paypal" : 90, "paypalcorp" : 50}
     }
 
 

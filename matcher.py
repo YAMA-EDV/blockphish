@@ -1,6 +1,5 @@
 import Levenshtein
 from fuzzywuzzy import fuzz
-from math import log10
 
 def fuzzy_scorer(keywords, target):
     '''
@@ -28,9 +27,7 @@ def fuzzy_scorer(keywords, target):
         for position in range(0, num_iterations):
             window = longer[position:position+window_length]
             result = Levenshtein.ratio(window, shorter)
-            if(result > score):
-                score = result
-
+        
         simple = fuzz.ratio(keyword, target) / 100
         partial = fuzz.partial_ratio(keyword, target) / 100
         sort = fuzz.token_sort_ratio(keyword, target) / 100
@@ -45,8 +42,11 @@ def fuzzy_scorer(keywords, target):
         if set_ratio > score:
             score = set_ratio
 
-        # Scale according to user's setting
-        score = score * (value / 100)
+        # Reduce the effect of shorter phishing URLs, e.g. allet on myetherwallet
+        if len(target) < 6 and len(keyword) > 6:
+            score = score - (len(keyword) - len(target)) * 3 / 100 
+
+        score = score * (value / 100) 
         
     # Only looking for strings that are quite similar, anything less than that is noise
     if score < 0.80:

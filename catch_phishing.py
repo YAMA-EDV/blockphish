@@ -42,6 +42,10 @@ def score_domain(target_domain, watch_domain, keywords):
 
     # Step 1: If the watch domain is in the target domain, but they aren't equal, very suspicious (0-100)
     if watch_domain in target_domain:
+        score += 100
+
+    # Step 1: If the watch domain is in the target domain, but they aren't equal, very suspicious (0-100)
+    if remove_tld(watch_domain) in remove_tld(target_domain):
         score += 80
 
     # Step 2: Detect unreliable TLDs (0-20)
@@ -49,11 +53,11 @@ def score_domain(target_domain, watch_domain, keywords):
         if target_domain.endswith(tld):
             score += 20
 
-    # Step 3: Detect the presence of the keywords in the target domain (0-60)
+    # Step 3: Detect the presence of the keywords in the target domain 
     score += fuzzy_scorer(keywords, target_domain)*60
 
-    # Step 4: Detect the presence of the watch domain in the target domain (0-90)
-    score += fuzzy_scorer({remove_tld(watch_domain): 100}, remove_tld(target_domain))*80
+    # Step 4: Detect the presence of the watch domain in the target domain 
+    score += fuzzy_scorer({remove_tld(watch_domain): 100}, remove_tld(target_domain))*100
     
     # Step 5: Detect suspicious domain structure (0-20)
     # Remove initial '*.' for wildcard certificates
