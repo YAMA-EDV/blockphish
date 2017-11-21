@@ -1,6 +1,7 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from default_settings import google_drive_email
+from utils import whois_lookup
 
 class sheets_api:
     def __init__(self, spreadsheet_url):
@@ -20,8 +21,11 @@ class sheets_api:
 
         self.check_token_valid()
         print ("Getting the worksheet...")
-        worksheet = self.spreadsheet.get_worksheet(0)
-
+        try:
+            worksheet = self.spreadsheet.worksheet("Detected Domains")
+        except gspread.exceptions.WorksheetNotFound:
+            print("Error: Could not find a worksheet with the name 'Detected Domains. Please clone the spreadsheet listed on the git page.")
+            raise gspread.exceptions.WorksheetNotFound
         if self.first_run:
             print ("Fetching current records")
             all_records = worksheet.get_all_values()
@@ -31,6 +35,7 @@ class sheets_api:
                 print ("Adding row.... {}".format(header_list))
                 worksheet.append_row(header_list)
             self.first_run = False
+
 
         #Now we need to add the values.
         print (tuple_list)
