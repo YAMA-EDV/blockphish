@@ -1,6 +1,3 @@
-#Rename this to settings.py
-
-
 ####################
 #Google Spreadsheets SOC(Security Operations Centre)
 ####################
@@ -9,8 +6,8 @@
 google_spreadsheet_url = ""
 #The user to write changes to the spreadsheet under.
 google_drive_email = ""
-#Number of threads for google sheets worker (recommended is 1)
-num_threads = 1
+#If anything scores above this, we should send it to the google spreadsheet.
+google_threshold = 75
 
 ####################
 #Domains
@@ -23,8 +20,6 @@ watchlist = ["myetherwallet.com", "paypal.com"]
 whitelisted_domains = ["google.com"]
 
 keywords = {
-
-# Cryptocurrency
     'myether' : 80,
     'localbitcoin': 70,
     'poloniex': 60,
@@ -40,23 +35,7 @@ keywords = {
     'lakebtc': 60,
     'bitfinex': 60,
     'bitconnect': 60,
-    'coinsbank': 60,
-
-# Miscellaneous & SE tricks
-    'cgi-bin': 50,
-    '.com-': 20,
-    '-com.': 20,
-    '.net-': 20,
-    '.org-': 20,
-    '.com-': 20,
-    '.net.': 20,
-    '.org.': 20,
-    '.com.': 20,
-    '.gov-': 30,
-    '.gov.': 30,
-    '.gouv-': 40,
-    '-gouv-': 40,
-    '.gouv.': 40,
+    'coinsbank': 60
 }
 
 bad_repuation_tlds = [

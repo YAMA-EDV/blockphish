@@ -1,4 +1,5 @@
 from tldextract import extract, TLDExtract
+import pythonwhois
 
 def clean_domain(domain):
     '''
@@ -10,6 +11,13 @@ def clean_domain(domain):
     domain = domain.strip("*.").strip(".").strip().lower()
     return domain
 
+def whois_lookup(domain):
+    try:
+        whois_data = pythonwhois.net.get_whois_raw(domain)
+        if len(whois_data) > 0:
+            return whois_data[0]
+    except:
+        return "Couldn't lookup WHOIS"
 
 def split_domain_into_words(domain) :
     '''
