@@ -20,15 +20,18 @@ class logging_methods:
         :param score: score
         :return: Nothing.
         '''
+        global goog_sheets
+
+        #If score below threshold.
         if score < google_threshold:
             return
-        global goog_sheets
+
+        #check if we need to initialise google_sheets.
         if not goog_sheets:
             goog_sheets = sheets.sheets_api(google_spreadsheet_url)
-        print ("logging....")
-        if not(google_spreadsheet_url and len(google_spreadsheet_url) > 0):
-            print ("Not sending to google spreadsheets. If you would like to send to a spreadsheet, configure it in the settings file.")
+
         top_level = extract(domain).registered_domain
+
         whois_data = whois_lookup(top_level)
         message = [('Date discovered', str(datetime.datetime.now())),('Suspicious Domain', domain), ('Watch domain', watchdomain), ('WHOIS', whois_data), ('Score', score)]
         goog_sheets.add_suspicious_phishing_entry(message)

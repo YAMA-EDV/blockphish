@@ -88,11 +88,11 @@ directory in this project.
 ####################
 
 #Should be writable by the user specified credentials in
-google_spreadsheet_url = "https://docs.google.com/spreadsheets/d/XXXXX"
+google_spreadsheet_url = ""
 #The user to write changes to the spreadsheet under.
-google_drive_email = "email@domain.com"
-#Number of threads for google sheets worker (recommended is 1)
-num_threads = 1
+google_drive_email = ""
+#If anything scores above this, we should send it to the google spreadsheet.
+google_threshold = 75
 ...
 ```
 
@@ -109,7 +109,7 @@ python3 -m unittest discover -s tests/ -p '*_test.py'
 $ ./catch_phishing.py
 ```
 
-### Example phishing caught
+### Examples of suspicious domains
 
 ![Blockchain.info Clone](https://i.imgur.com/EBHn2VU.png)
 

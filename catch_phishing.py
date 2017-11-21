@@ -10,9 +10,9 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 import certstream
-from default_settings import watchlist, keywords, bad_repuation_tlds, google_spreadsheet_url
-from utils import clean_domain, split_domain_into_words, remove_tld
-from matcher import fuzzy_scorer, watchdomain_in_domain
+from default_settings import watchlist, bad_repuation_tlds, google_spreadsheet_url
+from utils import clean_domain, remove_tld
+from matcher import fuzzy_scorer
 import logging_methods
 from queue import Queue
 import threading
@@ -91,9 +91,9 @@ def callback(message, context):
         for domain in all_domains:
 
             # Loop through each of the domains that we're watching for.
-            for watch_domain in watchlist:
+            for watch_domain in watchlist.keys():
                 lets_encrypt = False
-
+                keywords = watchlist[watch_domain]
                 score = score_domain(domain.lower(), watch_domain, keywords)
 
                 # More suspicious if it's issued by a free CA.

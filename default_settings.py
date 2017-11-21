@@ -14,30 +14,14 @@ google_threshold = 75
 ####################
 
 #Domains to monitor
-watchlist = ["myetherwallet.com", "paypal.com"]
+watchlist ={
+        "myetherwallet.com" : {"myetherwallet" : 100, "myether" : 70},
+        "paypal.com" : {"paypal" : 90, "paypalcorp" : 50}
+    }
+
 
 #Whitelist - do not create alerts for these domains.
-whitelisted_domains = ["google.com"]
-
-keywords = {
-    'myether' : 80,
-    'localbitcoin': 70,
-    'poloniex': 60,
-    'coinhive': 70,
-    'bithumb': 60,
-    'kraken': 50, # some false positives
-    'bitstamp': 60,
-    'bittrex': 60,
-    'blockchain': 70,
-    'bitflyer': 60,
-    'coinbase': 60,
-    'hitbtc': 60,
-    'lakebtc': 60,
-    'bitfinex': 60,
-    'bitconnect': 60,
-    'coinsbank': 60
-}
-
+whitelisted_domains = ["ethereum.org"]
 bad_repuation_tlds = [
     '.ga',
     '.gq',
