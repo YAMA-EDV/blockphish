@@ -41,7 +41,7 @@ def score_domain(target_domain, watch_domain, watch_keywords = []):
     # Step 0: If the target domain is the watch domain, don't score it
     if target_domain == watch_domain:
         return 0
-
+    
     # Step 1: If the watch domain is in the target domain, but they aren't equal, very suspicious (0-100)
     if watch_domain in target_domain:
         score += 80
@@ -50,13 +50,12 @@ def score_domain(target_domain, watch_domain, watch_keywords = []):
     for tld in bad_repuation_tlds:
         if target_domain.endswith(tld):
             score += 20
-
+    
     # Step 3: Detect the presence of the keywords in the target domain (0-60)
-    score += fuzzy_scorer(keywords, target_domain)*60
-
+    score += fuzzy_scorer(keywords, target_domain)*50
+    
     # Step 4: Detect the presence of the watch domain in the target domain (0-80)
-    domain_no_tld = remove_tld(watch_domain)
-    score += fuzzy_scorer([domain_no_tld], target_domain)*100
+    score += fuzzy_scorer([remove_tld(watch_domain)], remove_tld(target_domain))*100
 
     # Step 5: Detect suspicious domain structure (0-20)
 
@@ -102,7 +101,7 @@ def callback(message, context):
 
                 # More suspicious if it's issued by a free CA.
                 if "Let's Encrypt" in message['data']['chain'][0]['subject']['aggregated']:
-                    score += 30
+                    score += 20
                 
                 handle_score_and_log(domain, watch_domain, score)
 

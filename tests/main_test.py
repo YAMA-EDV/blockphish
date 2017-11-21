@@ -23,9 +23,8 @@ class test_main(unittest.TestCase):
         watch_domain = "paypal.com"
         self.assertFalse(catch_phishing.watchdomain_in_domain(domain, watch_domain))
 
-
     def test_score_domain(self):
-        
+    
         domain = "paypal.com"
         watch_domain = "paypal.com"
         score = catch_phishing.score_domain(domain, watch_domain, [])
@@ -87,6 +86,27 @@ class test_main(unittest.TestCase):
         score = catch_phishing.score_domain(domain, watch_domain, ['salamander'])
         print ("Domain: {} Watch Domain: {} Score: {}".format(domain, watch_domain, score))
         self.assertLess(score, 10, "domain in the watch_domain not flagging")
+
+        # Check for no match
+        domain = "whiteoleanderphotography.com"
+        watch_domain = "myetherwallet.com"
+        score = catch_phishing.score_domain(domain, watch_domain, ['salamander'])
+        print ("Domain: {} Watch Domain: {} Score: {}".format(domain, watch_domain, score))
+        self.assertLess(score, 10, "domain in the watch_domain not flagging")
+
+        # Check for no match
+        domain = "subdomain.whiteoleanderphotography.com"
+        watch_domain = "myetherwallet.com"
+        score = catch_phishing.score_domain(domain, watch_domain, ['bicycle'])
+        print ("Domain: {} Watch Domain: {} Score: {}".format(domain, watch_domain, score))
+        self.assertLess(score, 10, "domain in the watch_domain not flagging")
+
+        # Check for no match
+        domain = "www.blockchainrc.info"
+        watch_domain = "myetherwallet.com"
+        score = catch_phishing.score_domain(domain, watch_domain, ['bicycle'])
+        print ("Domain: {} Watch Domain: {} Score: {}".format(domain, watch_domain, score))
+        self.assertLess(score, 20, "domain in the watch_domain not flagging")
         
 def main():
     unittest.main()

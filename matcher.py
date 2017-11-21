@@ -1,4 +1,5 @@
 import Levenshtein
+from fuzzywuzzy import fuzz
 from math import log10
 
 def fuzzy_scorer(keywords, target):
@@ -29,9 +30,23 @@ def fuzzy_scorer(keywords, target):
             result = Levenshtein.ratio(window, shorter)
             if(result > score):
                 score = result
+
+        simple = fuzz.ratio(keyword, target) / 100
+        partial = fuzz.partial_ratio(keyword, target) / 100
+        sort = fuzz.token_sort_ratio(keyword, target) / 100
+        set_ratio = fuzz.token_set_ratio(keyword, target) / 100
+
+        if simple > score:
+            score = simple
+        if partial > score:
+            score = partial
+        if sort > score:
+            score = sort
+        if set_ratio > score:
+            score = set_ratio
     
     # Only looking for strings that are quite similar, anything less than that is noise
-    if score < 0.6:
+    if score < 0.7:
         score = 0
 
     return score

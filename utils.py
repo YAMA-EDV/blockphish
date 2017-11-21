@@ -50,5 +50,7 @@ def remove_tld(domain) :
     :return:
     '''
     # Remove the tlds
-    return extract(domain).domain
+    tld = extract(domain).suffix
+    domain = ''.join(domain.rsplit(tld, 1))
 
+    return domain
