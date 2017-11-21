@@ -50,10 +50,10 @@ def score_domain(target_domain, watch_domain, keywords):
             score += 20
 
     # Step 3: Detect the presence of the keywords in the target domain (0-60)
-    score += fuzzy_scorer(keywords, target_domain)*50
+    score += fuzzy_scorer(keywords, target_domain)*60
 
-    # Step 4: Detect the presence of the watch domain in the target domain (0-80)
-    score += fuzzy_scorer({remove_tld(watch_domain): 100}, remove_tld(target_domain))*100
+    # Step 4: Detect the presence of the watch domain in the target domain (0-90)
+    score += fuzzy_scorer({remove_tld(watch_domain): 100}, remove_tld(target_domain))*80
     
     # Step 5: Detect suspicious domain structure (0-20)
     # Remove initial '*.' for wildcard certificates

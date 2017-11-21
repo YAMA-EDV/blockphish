@@ -122,6 +122,13 @@ class test_main(unittest.TestCase):
         score = catch_phishing.score_domain(domain, watch_domain, keywords)
         print ("Domain: {} Watch Domain: {} Score: {}".format(domain, watch_domain, score))
         self.assertLess(score, 25, "domain in the watch_domain not flagging")
+
+        # Check for no match
+        domain = "5era.com"
+        watch_domain = "myetherwallet.com"
+        score = catch_phishing.score_domain(domain, watch_domain, keywords)
+        print ("Domain: {} Watch Domain: {} Score: {}".format(domain, watch_domain, score))
+        self.assertLess(score, 25, "domain in the watch_domain not flagging")
         
 def main():
     unittest.main()

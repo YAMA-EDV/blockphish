@@ -30,7 +30,6 @@ def fuzzy_scorer(keywords, target):
             result = Levenshtein.ratio(window, shorter)
             if(result > score):
                 score = result
-        
 
         simple = fuzz.ratio(keyword, target) / 100
         partial = fuzz.partial_ratio(keyword, target) / 100
@@ -50,7 +49,7 @@ def fuzzy_scorer(keywords, target):
         score = score * (value / 100)
         
     # Only looking for strings that are quite similar, anything less than that is noise
-    if score < 0.7:
+    if score < 0.80:
         score = 0
 
     return score
