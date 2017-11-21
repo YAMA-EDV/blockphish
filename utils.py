@@ -13,16 +13,16 @@ def clean_domain(domain):
 
 def split_domain_into_words(domain) :
     '''
-    Split the domain into it words if possible, e.g. paypal-account.com -> ['paypal', 'account']
+    Split the domain into words if possible, e.g. paypal-account.com -> ['paypal', 'account']
     :param domain:
     :return:
     '''
-    #Remove the tld
+    # Remove the tld
     tld = extract(domain)
     domain = domain.replace(tld.suffix, "")
 
 
-    #Get list of TLDs
+    # Get list of TLDs
     extract_object = TLDExtract()
     all_tlds = extract_object.tlds
 
@@ -32,7 +32,7 @@ def split_domain_into_words(domain) :
     words = set()
     current_word = ""
 
-    #Split the domain into words based on non-alphanumeric chars acting as splits.
+    # Split the domain into words based on non-alphanumeric chars acting as splits.
     for char in domain:
         if not char.isalnum():
             if len(current_word) > 0:
@@ -41,3 +41,14 @@ def split_domain_into_words(domain) :
             continue
         current_word += char
     return sorted(list(words))
+
+
+def remove_tld(domain) :
+    '''
+    Split the domain into words if possible, e.g. paypal-account.com -> ['paypal', 'account']
+    :param domain:
+    :return:
+    '''
+    # Remove the tlds
+    return extract(domain).domain
+

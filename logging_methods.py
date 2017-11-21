@@ -39,17 +39,17 @@ class logging_methods:
         pbar.update(1)
         if score >= 100:
             tqdm.tqdm.write(
-                "[!] Suspicious: "
+                "[!] Very Suspicious: "
                 "{} (score={}) flagged for {}".format(colored(domain, 'red', attrs=['underline', 'bold']), score, watchdomain))
         elif score >= 90:
             tqdm.tqdm.write(
                 "[!] Suspicious: "
                 "{} (score={}) flagged for {}".format(colored(domain, 'red', attrs=['underline']), score, watchdomain))
-        elif score >= 80:
+        elif score >= 70:
             tqdm.tqdm.write(
                 "[!] Likely    : "
                 "{} (score={}) flagged for {}".format(colored(domain, 'yellow', attrs=['underline']), score, watchdomain))
-        elif score >= 65:
+        elif score >= 50:
             tqdm.tqdm.write(
                 "[+] Potential : "
                 "{} (score={}) flagged for {}".format(colored(domain, attrs=['underline']), score, watchdomain))

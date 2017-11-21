@@ -48,3 +48,6 @@ dev_settings.py
 
 #TLDS
 .tlds
+
+# vscode
+.vscode

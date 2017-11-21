@@ -11,9 +11,8 @@
 # GNU General Public License for more details.
 import certstream
 from default_settings import watchlist, keywords, bad_repuation_tlds, google_spreadsheet_url, num_threads
-from utils import clean_domain, split_domain_into_words
-from domain_matching import watchdomain_in_domain
-from fuzzy_matching import fuzzy_matcher
+from utils import clean_domain, split_domain_into_words, remove_tld
+from matcher import fuzzy_scorer, watchdomain_in_domain
 import logging_methods
 from queue import Queue
 import threading
@@ -22,50 +21,59 @@ import time
 google_sheets_queue = Queue()
 log = logging_methods.logging_methods()
 
-def score_domain(domain, watchdomain, watch_keywords):
+def score_domain(target_domain, watch_domain, watch_keywords = []):
     '''
-    The domain to be analysed compared with the watchdomain that we are monitoring.
+    Score the likelihood of the target domain being a phishing clone of the watch domain. 
 
-    :param domain: the domain of the newly registered cert.
-    :param watchdomain: the domain that we are monitoring
+    :param target_domain: the domain of the newly registered certificate
+    :param watch_domain: the domain being monitored
+    :param watch_domain: whether the CA of the certificate is Let's Encrypt
     :return: the score of the domain in question.
     '''
-    fuzzy = fuzzy_matcher()
 
-    domain = clean_domain(domain)
+    keywords = watch_keywords
+
+    target_domain = clean_domain(target_domain)
+    watch_domain = clean_domain(watch_domain)
+
     score = 0
 
-    for t in bad_repuation_tlds:
-        if domain.endswith(t):
+    # Step 0: If the target domain is the watch domain, don't score it
+    if target_domain == watch_domain:
+        return 0
+
+    # Step 1: If the watch domain is in the target domain, but they aren't equal, very suspicious (0-100)
+    if watch_domain in target_domain:
+        score += 80
+
+    # Step 2: Detect unreliable TLDs (0-20)
+    for tld in bad_repuation_tlds:
+        if target_domain.endswith(tld):
             score += 20
 
-    #Fuzzy matching
-    score += fuzzy.score_keywords(keywords, domain)*100
+    # Step 3: Detect the presence of the keywords in the target domain (0-60)
+    score += fuzzy_scorer(keywords, target_domain)*60
 
-    words_in_domain = split_domain_into_words(domain)
-    for key in watch_keywords:
-        if key in words_in_domain:
-            score+= 50
-        else:
-            fuzzy_keyword_score = fuzzy.score_keywords(words_in_domain, key)
-            score+=fuzzy_keyword_score
+    # Step 4: Detect the presence of the watch domain in the target domain (0-80)
+    domain_no_tld = remove_tld(watch_domain)
+    score += fuzzy_scorer([domain_no_tld], target_domain)*100
 
-    # Remove initial '*.' for wildcard certificates bug
-    if domain.startswith('*.'):
-        domain = domain[2:]
-        # ie. detect fake .com (ie. *.com-account-management.info)
-        if words_in_domain[0] in ['com', 'net', 'org']:
-            score += 10
+    # Step 5: Detect suspicious domain structure (0-20)
 
-    #is the watch domain embedded in the new domain.
-        if watchdomain_in_domain(domain, watchdomain):
-            score+=100
+    # Remove initial '*.' for wildcard certificates 
+    if target_domain.startswith('*.'):
+        target_domain = target_domain[2:]
+
+        # Detect fake TLD (e.g. *.com-account-management.info)
+        if target_domain[0] in ['com', 'net', 'org']:
+            score += 20
 
     return score
 
 def handle_score_and_log(domain, watchdomain, score):
     '''
-    Pass this to our various logging methods and decide if we should log them.
+    Pass the results logging methods and decide if we should log them.
+
     :param domain:
     :param watchdomain:
     :param score:
@@ -77,22 +85,26 @@ def handle_score_and_log(domain, watchdomain, score):
 
 def callback(message, context):
     """Callback handler for certstream events."""
+
     if message['message_type'] == "heartbeat":
         return
 
     if message['message_type'] == "certificate_update":
         all_domains = message['data']['leaf_cert']['all_domains']
-        #Cycle through all of our domains found in the cert
+        # Loop through all of the domains found in the cert
         for domain in all_domains:
 
-            #Cycle through each of the domains that we're watching for.
-            for watchdomain in watchlist:
-                score = score_domain(domain.lower(), watchdomain, keywords)
+            # Loop through each of the domains that we're watching for.
+            for watch_domain in watchlist:
+                lets_encrypt = False
 
-                #If it's issued by free CA, more suspect.
+                score = score_domain(domain.lower(), watch_domain, keywords)
+
+                # More suspicious if it's issued by a free CA.
                 if "Let's Encrypt" in message['data']['chain'][0]['subject']['aggregated']:
-                    score += 15
-                handle_score_and_log(domain, watchdomain, score)
+                    score += 30
+                
+                handle_score_and_log(domain, watch_domain, score)
 
 def google_worker():
     '''
@@ -106,14 +118,14 @@ def google_worker():
         time.sleep(1)
 
 def main():
-    #Spawn our google thread worker.
+    # Spawn our google thread worker
     if google_spreadsheet_url and len(google_spreadsheet_url) > 0:
             print ("Spawning {} google sheets threads".format(num_threads))
             for i in range(num_threads):
                 t = threading.Thread(target=google_worker)
                 t.start()
 
-    #Start streaming certs.
+    # Start streaming certificates
     certstream.listen_for_events(callback)
 
 if __name__ == "__main__":
