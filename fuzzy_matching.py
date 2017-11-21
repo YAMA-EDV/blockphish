@@ -1,4 +1,3 @@
-
 import Levenshtein
 
 class fuzzy_matcher:
@@ -7,8 +6,8 @@ class fuzzy_matcher:
         This method uses a sliding window and the Levenshtein distance to determine if the keyword is found in any substrings of the target. e.g. it helps you recognize that 'paypol' is closely found in 'longpaypalstring'
 
         :param keywords: List of keywords to monitor for a given domain.
-        :param keywords: The potential phishing domain.
-        :return:
+        :param target: The potential phishing domain.
+        :return: a float representing the score.
         '''
         
         score = 0.0

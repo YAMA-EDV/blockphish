@@ -43,6 +43,8 @@ tmtagsHistory
 
 #API key and creds
 .credentials
+credentials/creds.json
+dev_settings.py
 
 #TLDS
 .tlds

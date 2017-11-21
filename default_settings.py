@@ -1,11 +1,26 @@
-#Domains to monitor
-watchlist = ["myetherwallet.com", "paypal.com"]
+#Rename this to settings.py
+
+
+####################
+#Google Spreadsheets SOC(Security Operations Centre)
+####################
 
 #Should be writable by the user specified credentials in
 google_spreadsheet_url = ""
+#The user to write changes to the spreadsheet under.
+google_drive_email = ""
+#Number of threads for google sheets worker (recommended is 1)
+num_threads = 1
 
-#JSON user credentials for google auth
-google_JSON_file = ""
+####################
+#Domains
+####################
+
+#Domains to monitor
+watchlist = ["myetherwallet.com", "paypal.com"]
+
+#Whitelist - do not create alerts for these domains.
+whitelisted_domains = ["google.com"]
 
 keywords = {
 
@@ -44,7 +59,7 @@ keywords = {
     '.gouv.': 40,
 }
 
-tlds = [
+bad_repuation_tlds = [
     '.ga',
     '.gq',
     '.ml',
