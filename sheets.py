@@ -1,6 +1,6 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-from settings import google_drive_email
+from default_settings import google_drive_email
 
 class sheets_api:
     def __init__(self, spreadsheet_url):

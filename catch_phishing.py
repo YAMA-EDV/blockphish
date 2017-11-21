@@ -71,11 +71,9 @@ def handle_score_and_log(domain, watchdomain, score):
     :param score:
     :return:
     '''
-    #For now this is just logging to console, but google spreadsheets to come.
     log.console_log(domain, watchdomain, score)
     if google_spreadsheet_url and len(google_spreadsheet_url) > 0:
         google_sheets_queue.put((domain, watchdomain, score))
-        #log.google_sheets_log(domain, watchdomain, score)
 
 def callback(message, context):
     """Callback handler for certstream events."""
@@ -97,16 +95,26 @@ def callback(message, context):
                 handle_score_and_log(domain, watchdomain, score)
 
 def google_worker():
+    '''
+    This is the thread worker that will post data to sheets on our behalf.
+    :return:
+    '''
     while True:
         domain, watchdomain, score = google_sheets_queue.get()
         log.google_sheets_log(domain, watchdomain, score)
         google_sheets_queue.task_done()
         time.sleep(1)
 
-if google_spreadsheet_url and len(google_spreadsheet_url) > 0:
-        print ("Spawning {} google sheets threads".format(num_threads))
-        for i in range(num_threads):
-            t = threading.Thread(target=google_worker)
-            t.start()
+def main():
+    #Spawn our google thread worker.
+    if google_spreadsheet_url and len(google_spreadsheet_url) > 0:
+            print ("Spawning {} google sheets threads".format(num_threads))
+            for i in range(num_threads):
+                t = threading.Thread(target=google_worker)
+                t.start()
 
-certstream.listen_for_events(callback)
+    #Start streaming certs.
+    certstream.listen_for_events(callback)
+
+if __name__ == "__main__":
+    main()

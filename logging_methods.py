@@ -1,4 +1,4 @@
-from settings import google_spreadsheet_url
+from default_settings import google_spreadsheet_url
 import sheets
 import tqdm
 from termcolor import colored
@@ -6,10 +6,21 @@ import datetime
 
 log_suspicious = 'suspicious_domains.log'
 pbar = tqdm.tqdm(desc='certificate_update', unit='cert')
-goog_sheets = sheets.sheets_api(google_spreadsheet_url)
+goog_sheets = None
 
 class logging_methods:
     def google_sheets_log(self, domain, watchdomain, score):
+        '''
+        This function is a wrapper for logging to google sheets.
+
+        :param domain: Suspicious domain
+        :param watchdomain: domain we flagged it impersonating
+        :param score: score
+        :return: Nothing.
+        '''
+        global goog_sheets
+        if not goog_sheets:
+            goog_sheets = sheets.sheets_api(google_spreadsheet_url)
         print ("logging....")
         if not(google_spreadsheet_url and len(google_spreadsheet_url) > 0):
             print ("Not sending to google spreadsheets. If you would like to send to a spreadsheet, configure it in the settings file.")
