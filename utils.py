@@ -51,6 +51,6 @@ def remove_tld(domain) :
     '''
     # Remove the tlds
     tld = extract(domain).suffix
-    domain = ''.join(domain.rsplit(tld, 1))
+    domain = ''.join(domain.rsplit(tld, 1)).strip('.')
 
     return domain

@@ -53,6 +53,12 @@ class logging_methods:
             tqdm.tqdm.write(
                 "[+] Potential : "
                 "{} (score={}) flagged for {}".format(colored(domain, attrs=['underline']), score, watchdomain))
+        '''
+        else:
+            tqdm.tqdm.write(
+                "[+] Safe : "
+                "{} (score={}) flagged for {}".format(colored(domain, attrs=['underline']), score, watchdomain))
+        '''
 
         if score >= 75:
             with open(log_suspicious, 'a') as f:

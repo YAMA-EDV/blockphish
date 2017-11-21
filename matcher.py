@@ -15,12 +15,12 @@ def fuzzy_scorer(keywords, target):
     
     score = 0.0
 
-    for keyword in keywords:
+    for keyword, value in keywords.items():
         # Find the shorter string
         shorter,longer = (keyword,target) if len(keyword) < len(target) else (target,keyword)
         # Set the window length equal to the shorter string
         window_length = len(shorter)
-
+        
         # Set the number of times to move the window
         num_iterations = len(longer)-len(shorter)+1
 
@@ -30,12 +30,13 @@ def fuzzy_scorer(keywords, target):
             result = Levenshtein.ratio(window, shorter)
             if(result > score):
                 score = result
+        
 
         simple = fuzz.ratio(keyword, target) / 100
         partial = fuzz.partial_ratio(keyword, target) / 100
         sort = fuzz.token_sort_ratio(keyword, target) / 100
         set_ratio = fuzz.token_set_ratio(keyword, target) / 100
-
+        
         if simple > score:
             score = simple
         if partial > score:
@@ -44,7 +45,10 @@ def fuzzy_scorer(keywords, target):
             score = sort
         if set_ratio > score:
             score = set_ratio
-    
+
+        # Scale according to user's setting
+        score = score * (value / 100)
+        
     # Only looking for strings that are quite similar, anything less than that is noise
     if score < 0.7:
         score = 0

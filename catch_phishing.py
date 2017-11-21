@@ -21,7 +21,7 @@ import time
 google_sheets_queue = Queue()
 log = logging_methods.logging_methods()
 
-def score_domain(target_domain, watch_domain, watch_keywords = []):
+def score_domain(target_domain, watch_domain, keywords):
     '''
     Score the likelihood of the target domain being a phishing clone of the watch domain. 
 
@@ -31,13 +31,11 @@ def score_domain(target_domain, watch_domain, watch_keywords = []):
     :return: the score of the domain in question.
     '''
 
-    keywords = watch_keywords
-
     target_domain = clean_domain(target_domain)
     watch_domain = clean_domain(watch_domain)
 
     score = 0
-
+    
     # Step 0: If the target domain is the watch domain, don't score it
     if target_domain == watch_domain:
         return 0
@@ -55,8 +53,8 @@ def score_domain(target_domain, watch_domain, watch_keywords = []):
     score += fuzzy_scorer(keywords, target_domain)*50
     
     # Step 4: Detect the presence of the watch domain in the target domain (0-80)
-    score += fuzzy_scorer([remove_tld(watch_domain)], remove_tld(target_domain))*100
-
+    score += fuzzy_scorer({remove_tld(watch_domain): 100}, remove_tld(target_domain))*100
+    
     # Step 5: Detect suspicious domain structure (0-20)
 
     # Remove initial '*.' for wildcard certificates 
