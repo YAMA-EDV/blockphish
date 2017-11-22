@@ -111,9 +111,16 @@ $ ./catch_phishing.py
 
 ### Examples of suspicious domains
 
+A clear clone of an existing well known brand with minor changes:
+
 ![Blockchain.info Clone](https://i.imgur.com/EBHn2VU.png)
 
+A simple typo on MyEtherWallet:
+
 ![Myetherwallet](https://i.imgur.com/p0eXL68.png)
+
+A [homograph](https://en.wikipedia.org/wiki/IDN_homograph_attack) attack
+on MyEtherWallet (note the 'e's).
 
 ![Myetherwallet](https://i.imgur.com/YSTKcCC.png)
 
