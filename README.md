@@ -1,3 +1,5 @@
+![BlockPhish](https://i.imgur.com/Y37F3Il.png)
+
 # Phishing detection for cryptocurrency projects
 
 Phishing remains one of the greatest off chain security threats to the

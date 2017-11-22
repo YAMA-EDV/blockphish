@@ -18,6 +18,8 @@ import threading
 import time
 import Levenshtein
 from fuzzywuzzy import fuzz
+import sys
+import json
 
 google_sheets_queue = Queue()
 log = logging_methods.logging_methods()
@@ -87,6 +89,19 @@ def score_domain(target_domain, watch_domain, keywords):
 
     return score
 
+def load_config_file(config_file):
+    try:
+        config = open(config_file, 'r')
+        config_file = config.read()
+        config_file.close()
+        settings_dictionary = json.loads(config_file)
+        globals().update(settings_dictionary)
+        return True
+
+    except Exception as e:
+        print ("Error loading config file - {}\n{}".format(config_file,e))
+        return False
+
 def handle_score_and_log(domain, watchdomain, score):
     '''
     Pass the results logging methods and decide if we should log them.
@@ -139,7 +154,12 @@ def google_worker():
         google_sheets_queue.task_done()
         time.sleep(1)
 
-def main():
+if len(sys.argv) != 2:
+    print ("\nUsage: python3 blockphish.py monitoring_profiles/<profile>.json")
+    sys.exit()
+
+def main(config_file):
+    load_config_file(config_file)
     # Spawn our google thread worker
     if google_spreadsheet_url and len(google_spreadsheet_url) > 0:
             print ("Spawning google sheets thread")
@@ -148,6 +168,7 @@ def main():
 
     # Start streaming certificates
     certstream.listen_for_events(callback)
+    print()
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv[1])

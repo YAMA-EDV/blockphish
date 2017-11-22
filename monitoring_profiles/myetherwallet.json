@@ -1,0 +1,18 @@
+{
+  "config_name" : "MyEtherWallet",
+
+  "google_spreadsheet_url" : "",
+  "google_drive_email" : "",
+  "google_threshold" : 90,
+
+  "watchlist" : {
+    "myetherwallet.com": {
+      "myetherwallet": 100, "myether": 50
+    },
+    "paypal.com": {
+      "paypal": 90, "paypalcorp": 50
+    }
+  },
+
+  "whitelisted_domains" : ["ethereum.org"]
+}
