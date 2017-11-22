@@ -3,9 +3,9 @@
 ####################
 
 #Should be writable by the user specified credentials in
-google_spreadsheet_url = ""
+google_spreadsheet_url = "https://docs.google.com/spreadsheets/d/1kLwTQBnhpcRKzYpFeHSh1zqOJMY8H5ESqEwKM0xhnJc/edit#gid=0"
 #The user to write changes to the spreadsheet under.
-google_drive_email = ""
+google_drive_email = "matt@zenoic.com"
 #If anything scores above this, we should send it to the google spreadsheet.
 google_threshold = 75
 

@@ -18,6 +18,7 @@ from queue import Queue
 import threading
 import time
 
+
 google_sheets_queue = Queue()
 log = logging_methods.logging_methods()
 
@@ -82,6 +83,7 @@ def handle_score_and_log(domain, watchdomain, score):
     log.console_log(domain, watchdomain, score)
     if google_spreadsheet_url and len(google_spreadsheet_url) > 0:
         google_sheets_queue.put((domain, watchdomain, score))
+        #log.google_sheets_log(domain, watchdomain, score)
 
 def callback(message, context):
     """Callback handler for certstream events."""
@@ -112,7 +114,11 @@ def google_worker():
     :return:
     '''
     while True:
-        domain, watchdomain, score = google_sheets_queue.get()
+        result = google_sheets_queue.get()
+        if not result:
+            time.sleep(1)
+            continue
+        domain, watchdomain, score = result
         log.google_sheets_log(domain, watchdomain, score)
         google_sheets_queue.task_done()
         time.sleep(1)

@@ -113,6 +113,10 @@ $ ./catch_phishing.py
 
 ![Blockchain.info Clone](https://i.imgur.com/EBHn2VU.png)
 
+![Myetherwallet](https://i.imgur.com/p0eXL68.png)
+
+![Myetherwallet](https://i.imgur.com/YSTKcCC.png)
+
 ### Thanks
 Thanks to @x0rz https://github.com/x0rz/phishing_catcher for the original inspiration.
 
