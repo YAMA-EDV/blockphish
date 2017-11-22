@@ -1,4 +1,3 @@
-from default_settings import google_spreadsheet_url, google_threshold
 import sheets
 import tqdm
 from termcolor import colored
@@ -11,7 +10,7 @@ pbar = tqdm.tqdm(desc='certificate_update', unit='cert')
 goog_sheets = None
 
 class logging_methods:
-    def google_sheets_log(self, domain, watchdomain, score):
+    def google_sheets_log(self, domain, watchdomain, score, google_drive_email, google_sheets_url, google_threshold):
         '''
         This function is a wrapper for logging to google sheets.
 

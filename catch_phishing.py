@@ -10,7 +10,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 import certstream
-from default_settings import watchlist, bad_repuation_tlds, google_spreadsheet_url
+from default_settings import bad_repuation_tlds
 from utils import clean_domain, remove_tld, fuzzy_scorer
 import logging_methods
 from queue import Queue

@@ -1,6 +1,9 @@
 from tldextract import extract, TLDExtract
 import pythonwhois
 import statistics
+import Levenshtein
+from fuzzywuzzy import fuzz
+
 
 def clean_domain(domain):
     '''
@@ -9,6 +12,8 @@ def clean_domain(domain):
     :param domain: domain to clean
     :return: cleaned up domain
     '''
+    #Lets ensure that it's in an nice string format for idna
+    domain = domain.encode("idna").decode("idna")
     domain = domain.strip("*.").strip(".").strip().lower()
     return domain
 
@@ -64,8 +69,7 @@ def remove_tld(domain) :
 
     return domain
 
-import Levenshtein
-from fuzzywuzzy import fuzz
+
 
 def fuzzy_scorer(keywords, target):
     '''

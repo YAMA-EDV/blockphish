@@ -1,9 +1,9 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-from default_settings import google_drive_email
+
 
 class sheets_api:
-    def __init__(self, spreadsheet_url):
+    def __init__(self, spreadsheet_url, google_drive_email):
         credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials/creds.json',scopes=['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive'])
         self.delegated_credentials = credentials.create_delegated(google_drive_email)
         self.gc = gspread.authorize(self.delegated_credentials)
