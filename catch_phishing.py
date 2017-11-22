@@ -11,13 +11,13 @@
 # GNU General Public License for more details.
 import certstream
 from default_settings import watchlist, bad_repuation_tlds, google_spreadsheet_url
-from utils import clean_domain, remove_tld
-from matcher import fuzzy_scorer
+from utils import clean_domain, remove_tld, fuzzy_scorer
 import logging_methods
 from queue import Queue
 import threading
 import time
-
+import Levenshtein
+from fuzzywuzzy import fuzz
 
 google_sheets_queue = Queue()
 log = logging_methods.logging_methods()
@@ -36,38 +36,54 @@ def score_domain(target_domain, watch_domain, keywords):
     watch_domain = clean_domain(watch_domain)
 
     score = 0
-    
-    # Step 0: If the target domain is the watch domain, don't score it
+
+    # If the target domain is the watch domain, don't score it
     if target_domain == watch_domain:
         return 0
 
-    # Step 1: If the watch domain is in the target domain, but they aren't equal, very suspicious (0-100)
+    # If the parsed target domain is the watch domain, but with a different TLD, very suspicious 
+    if remove_tld(watch_domain) == remove_tld(target_domain):
+        return 100
+
+    # If the parsed watch domain is in the target domain, but they aren't equal, suspicious 
+    if remove_tld(watch_domain) in target_domain:
+        score = 70
+
+    # If they have a low levenshtein distance, suspicious
+    l_distance = Levenshtein.distance(remove_tld(watch_domain),remove_tld(target_domain))
+    fuzz_ratio = fuzz.token_sort_ratio(remove_tld(watch_domain),remove_tld(target_domain))
+
+    if l_distance <= 3:
+        score = 70 + 10 * (3-l_distance)
+    elif fuzz_ratio > 80:
+        score = fuzz_ratio - 20 
+
+    # If the watch domain is in the target domain, but they aren't equal, suspicious
     if watch_domain in target_domain:
-        score += 100
+        return 100
 
-    # Step 1: If the watch domain is in the target domain, but they aren't equal, very suspicious (0-100)
-    if remove_tld(watch_domain) in remove_tld(target_domain):
-        score += 80
+    # TODO: add keyword functionality back in
 
-    # Step 2: Detect unreliable TLDs (0-20)
-    for tld in bad_repuation_tlds:
-        if target_domain.endswith(tld):
-            score += 20
+    target_len = len(remove_tld(target_domain))
+    watch_len = len(remove_tld(watch_domain))
 
-    # Step 3: Detect the presence of the keywords in the target domain 
-    score += fuzzy_scorer(keywords, target_domain)*60
-
-    # Step 4: Detect the presence of the watch domain in the target domain 
-    score += fuzzy_scorer({remove_tld(watch_domain): 100}, remove_tld(target_domain))*100
+    # If the target domain is much shorter than the watch domain, it's probably not much of a threat
+    if target_len > watch_len / 2:
+        # Detect the presence of the watch domain in the target domain 
+        score = fuzzy_scorer({remove_tld(watch_domain): 100}, remove_tld(target_domain))
     
-    # Step 5: Detect suspicious domain structure (0-20)
+    # Detect suspicious domain structure
     # Remove initial '*.' for wildcard certificates
     if target_domain.startswith('*.'):
         target_domain = target_domain[2:]
 
         # Detect fake TLD (e.g. *.com-account-management.info)
-        if target_domain[0] in ['com', 'net', 'org']:
+        if any(fake_tld in remove_tld(target_domain) for fake_tld in ['com', 'net', 'org', 'io']):
             score += 20
+
+    # Detect unreliable TLDs 
+    if any(target_domain.endswith(bad_tld) for bad_tld in bad_repuation_tlds) :
+        score += 20
 
     return score
 
