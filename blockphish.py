@@ -11,7 +11,7 @@
 # GNU General Public License for more details.
 import certstream
 from default_settings import bad_repuation_tlds
-from utils import clean_domain, remove_tld, fuzzy_scorer
+from utils import clean_domain, remove_tld, fuzzy_scorer_domain, fuzzy_scorer_keywords
 import logging_methods
 from queue import Queue
 import threading
@@ -43,6 +43,11 @@ def score_domain(target_domain, watch_domain, keywords):
     if target_domain == watch_domain:
         return 0
 
+    # If the domain is in the whitelist, don't report it
+    for (keyword, value) in keywords.items():
+        if (target_domain == keyword and value == 0):
+            return 0
+
     # If the parsed target domain is the watch domain, but with a different TLD, very suspicious 
     if remove_tld(watch_domain) == remove_tld(target_domain):
         return 100
@@ -54,25 +59,28 @@ def score_domain(target_domain, watch_domain, keywords):
     # If they have a low levenshtein distance, suspicious
     l_distance = Levenshtein.distance(remove_tld(watch_domain),remove_tld(target_domain))
     fuzz_ratio = fuzz.token_sort_ratio(remove_tld(watch_domain),remove_tld(target_domain))
-
-    if l_distance <= 3:
-        score = 70 + 10 * (3-l_distance)
+    
+    # Works for both short and long strings
+    if l_distance <= 2:
+        score = 70 + 10 * (2-l_distance)
+    # Better with longer strings   
     elif fuzz_ratio > 80:
-        score = fuzz_ratio - 20 
-
+        score = fuzz_ratio - 25 
+    
     # If the watch domain is in the target domain, but they aren't equal, suspicious
     if watch_domain in target_domain:
         return 100
-
-    # TODO: add keyword functionality back in
-
+     
+    # score += fuzzy_scorer_keywords(keywords, remove_tld(target_domain))
+    # print(fuzzy_scorer_keywords(keywords, remove_tld(target_domain)))
+    
     target_len = len(remove_tld(target_domain))
     watch_len = len(remove_tld(watch_domain))
-
+    
     # If the target domain is much shorter than the watch domain, it's probably not much of a threat
-    if target_len > watch_len / 2:
+    if target_len > watch_len / 2 and target_len > 4:
         # Detect the presence of the watch domain in the target domain 
-        score = fuzzy_scorer({remove_tld(watch_domain): 100}, remove_tld(target_domain))
+        score += fuzzy_scorer_domain(remove_tld(watch_domain), remove_tld(target_domain)) * 0.95
     
     # Detect suspicious domain structure
     # Remove initial '*.' for wildcard certificates
@@ -127,13 +135,13 @@ def callback(message, context):
         # Loop through all of the domains found in the cert
         for domain in all_domains:
 
-            # Loop through each of the domains that we're watching for.
+            # Loop through each of the domains that we're watching
             for watch_domain in watchlist.keys():
                 lets_encrypt = False
                 keywords = watchlist[watch_domain]
                 score = score_domain(domain.lower(), watch_domain, keywords)
 
-                # More suspicious if it's issued by a free CA.
+                # More suspicious if it's issued by a free CA
                 if "Let's Encrypt" in message['data']['chain'][0]['subject']['aggregated']:
                     score += 20
 
@@ -154,10 +162,6 @@ def google_worker():
         google_sheets_queue.task_done()
         time.sleep(1)
 
-if len(sys.argv) != 2:
-    print ("\nUsage: python3 blockphish.py monitoring_profiles/<profile>.json")
-    sys.exit()
-
 def main(config_file):
     load_config_file(config_file)
     # Spawn our google thread worker
@@ -171,4 +175,7 @@ def main(config_file):
     print()
 
 if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print ("\nUsage: python3 blockphish.py monitoring_profiles/<profile>.json")
+        sys.exit()
     main(sys.argv[1])

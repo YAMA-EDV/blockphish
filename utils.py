@@ -75,7 +75,54 @@ def remove_tld(domain) :
 
 
 
-def fuzzy_scorer(keywords, target):
+def fuzzy_scorer_domain(domain, target):
+    '''
+    This method uses a sliding window and the Levenshtein distance to determine if the keyword is found in any substrings of the target. e.g. it helps you recognize that 'paypol' is closely found in 'longpaypalstring'
+
+    It will return a value between 0 and 1.
+
+    :param domain: Watch domain
+    :param target: The potential phishing domain.
+    :return: a float representing the score.
+    '''
+    
+    score = 0
+
+    # Find the shorter string
+    shorter,longer = (domain,target) if len(domain) < len(target) else (target,domain)
+
+    # Set the window length equal to the shorter string
+    window_length = len(shorter)
+    
+    # Set the number of times to move the window
+    num_iterations = len(longer)-len(shorter)+1
+
+    # Find the Levenshtein distance 
+    for position in range(0, num_iterations):
+        window = longer[position:position+window_length]
+        l_ratio = Levenshtein.ratio(window, shorter) * 100
+
+        if l_ratio > 60:
+            result = statistics.mean([100 - Levenshtein.distance(window, shorter) * 10, l_ratio, l_ratio])
+        else:
+            result = l_ratio
+        if result > score:
+            score = result
+    
+    simple = fuzz.ratio(domain, target)
+    partial = fuzz.partial_ratio(domain, target)
+    sort = fuzz.token_sort_ratio(domain, target)
+    set_ratio = fuzz.token_set_ratio(domain, target)
+    
+    score = max([score, simple, partial, sort, set_ratio])
+    
+    # Only looking for strings that are quite similar, anything less than that is noise
+    if score < 75:
+        score = 0
+
+    return score * 0.90
+
+def fuzzy_scorer_keywords(keywords, target):
     '''
     This method uses a sliding window and the Levenshtein distance to determine if the keyword is found in any substrings of the target. e.g. it helps you recognize that 'paypol' is closely found in 'longpaypalstring'
 
@@ -87,6 +134,7 @@ def fuzzy_scorer(keywords, target):
     '''
     
     score = 0
+    value = 0
 
     for keyword, value in keywords.items():
         # Find the shorter string
@@ -115,15 +163,19 @@ def fuzzy_scorer(keywords, target):
         sort = fuzz.token_sort_ratio(keyword, target)
         set_ratio = fuzz.token_set_ratio(keyword, target)
         
+        old_score = score
+
         score = max([score, simple, partial, sort, set_ratio])
 
-        score = (score - 15) * (value / 100)
-        
-    # Only looking for strings that are quite similar, anything less than that is noise
+        if old_score != score:
+            value = value
+
+    score = (score - 15) * (value / 100) / 2
+    
     if score < 60:
         score = 0
 
-    return score
+    return score * 0.90
 
 def watchdomain_in_domain(new_domain, watchdomain):
     '''

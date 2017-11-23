@@ -2,9 +2,9 @@
 
 # Phishing detection for cryptocurrency projects
 
-Phishing remains one of the greatest off chain security threats to the
-cryptocurrency space with increasingly sophisitcated groups targeting
-their victims across Slack, Telegram, forums as well as email. This
+Phishing remains one of the greatest off-chain security threats to the
+cryptocurrency space, with increasingly sophisticated groups targeting
+their victims across Slack, Telegram, forums, as well as email. This
 project streams newly registered SSL certificates using
 [certstream](https://certstream.calidog.io/) and attempts to identify
 suspicious domains based on keywords set by the user in near real time.
@@ -13,8 +13,8 @@ suspicious domains based on keywords set by the user in near real time.
 
 ### Installation
 
-The program has not been tested extensively with python 2, we'd strongly
-recommend using python 3.
+The program has not been tested with Python 2, we'd strongly
+recommend using Python 3.
 
 You will need the following python packages installed:
 
@@ -26,7 +26,7 @@ You will need the following python packages installed:
 * gspread
 * fuzzywuzzy
 
-To install the requirements run:
+To install the packages run:
 
 ```sh
 pip3 install -r requirements.txt
@@ -43,27 +43,27 @@ adapt the configuration of the file as outlined below.
 
 The watchlist variable in settings refers to specific domain(s) that you
 intend to monitor. These will typically be the domain(s) associated with
-your tokensale and company. You can also whitelist domains that are
+your tokensale, project or company. You can also whitelist domains that are
 similarly named to your domain that you would not like to receive alerts
-for.
+on by setting the value to 0.
 ```
 ...
 "watchlist" : {
     "myetherwallet.com": {
-      "myetherwallet": 100, "myether": 50
+      "myetherwallet": 100, "myether": 50, "notmyetherwallet.com" : 0
     }
  }
 ...
 ```
 In addition to the domains that you would like to monitor, you can
  associate an arbitrary number of keywords with that domain. In the
- example above, MyEtherWallet also want to monitor just the keyterm
+ example above, MyEtherWallet also wants to monitor the keywords
 "myetherwallet" and "myether".
 
 #### Google SOC
 
 A Security Operations Centre (SOC) is a unit dedicated to handling
-security incidents in large organisations. Most teams working
+security incidents in large organizations. Most teams working
 out of the crypto/blockchain space will not have a SOC, and as a result
 this project attempts to create a lean & reliable substitute by
 bootstrapping off of Google Sheets. Doing so allows teams to handle and
