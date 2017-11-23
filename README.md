@@ -137,4 +137,4 @@ GNU GPLv3
 Donations
 ---------
 
-**Donation Address:** 0x4fC60C34266af4106353c35d9600585e17F60512
+**ETH Donation Address:** 0x4fC60C34266af4106353c35d9600585e17F60512
