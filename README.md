@@ -18,6 +18,16 @@ recommend using python 3.
 
 You will need the following python packages installed:
 
+* termcolor
+* certstream
+* tqdm
+* tld
+* python_Levenshtein
+* gspread
+* fuzzywuzzy
+
+To install the requirements run:
+
 ```sh
 pip3 install -r requirements.txt
 ```
@@ -93,7 +103,7 @@ python3 -m unittest discover -s tests/ -p '*_test.py'
 ### Usage
 
 ```
-$ ./catch_phishing.py
+$ python3 blockphish.py monitoring_profile/profile.json
 ```
 
 ### Examples of suspicious domains
