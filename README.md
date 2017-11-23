@@ -38,9 +38,18 @@ similarly named to your domain that you would not like to receive alerts
 for.
 ```
 ...
-
+"watchlist" : {
+    "myetherwallet.com": {
+      "myetherwallet": 100, "myether": 50
+    }
+ }
 ...
 ```
+In addition to the domains that you would like to monitor, you can
+ associate an arbitrary number of keywords with that domain. In the
+ example above, MyEtherWallet also want to monitor just the keyterm
+"myetherwallet" and "myether".
+
 
 #### Keywords
 
@@ -86,7 +95,11 @@ permission to the google account you set in the monitoring profile.
   "google_threshold" : 90, #Domains over this score will be written to the spreadsheet
 ...
 ```
-5. You should be good to
+
+You should now start seeing domains that score over the specified
+threshold being written to your spreadsheet. [Setup email notifications](https://support.google.com/docs/answer/91588?co=GENIE.Platform%3DDesktop&hl=en)
+on the spreadsheet to receive notifications any time the program writes
+to the spreadsheet.
 
 ### Unit tests
 You can ensure that everything is running as intended and setup correctly
@@ -118,12 +131,18 @@ on MyEtherWallet (note the 'e's).
 
 ### Further assistance
 
-If you would like further assistance with combatting phishing attacks we'd
-be happy to [hear from you](https://www.iosiro.com/contact-us).
+If you would like [further assistance](https://www.iosiro.com/phishing-countermeasures/) with combatting phishing attacks we'd
+love to [hear from you](https://www.iosiro.com/contact-us).
 
 ### Thanks
+
 Thanks to @x0rz https://github.com/x0rz/phishing_catcher for the original inspiration.
 
 License
-----
+-------
 GNU GPLv3
+
+Donations
+---------
+
+**Donation Address:** 0x4fC60C34266af4106353c35d9600585e17F60512
