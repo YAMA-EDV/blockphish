@@ -50,24 +50,6 @@ In addition to the domains that you would like to monitor, you can
  example above, MyEtherWallet also want to monitor just the keyterm
 "myetherwallet" and "myether".
 
-
-#### Keywords
-
-Select appropriate keywords for your project. For example, myetherwallet.com
-might include:
-```
-...
-keywords = {
-    "myetherwallet" : 100,
-    "etherwallet" : 80,
-    "etherwal" : 60
-    }
-...
-```
-
-The integer associated with each keyword reflects the likelihood that a
-domain containing the keyword is a malicious clone.
-
 #### Google SOC
 
 A Security Operations Centre (SOC) is a unit dedicated to handling
