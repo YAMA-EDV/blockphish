@@ -91,10 +91,10 @@ def score_domain(target_domain, watch_domain, keywords):
 
 def load_config_file(config_file):
     try:
-        config = open(config_file, 'r')
-        config_file = config.read()
+        config_file = open(config_file, 'r')
+        config = config_file.read()
         config_file.close()
-        settings_dictionary = json.loads(config_file)
+        settings_dictionary = json.loads(config)
         globals().update(settings_dictionary)
         return True
 
@@ -113,8 +113,8 @@ def handle_score_and_log(domain, watchdomain, score):
     '''
     log.console_log(domain, watchdomain, score)
     if google_spreadsheet_url and len(google_spreadsheet_url) > 0:
-        google_sheets_queue.put((domain, watchdomain, score))
-        #log.google_sheets_log(domain, watchdomain, score)
+        google_sheets_queue.put((domain, watchdomain, score, google_drive_email, google_spreadsheet_url, google_threshold ))
+        #log.google_sheets_log(domain, watchdomain, score,google_drive_email, google_spreadsheet_url, google_threshold)
 
 def callback(message, context):
     """Callback handler for certstream events."""
@@ -137,7 +137,7 @@ def callback(message, context):
                 if "Let's Encrypt" in message['data']['chain'][0]['subject']['aggregated']:
                     score += 20
 
-                handle_score_and_log(domain, watch_domain, score)
+                handle_score_and_log(clean_domain(domain), clean_domain(watch_domain), score)
 
 def google_worker():
     '''
@@ -149,8 +149,8 @@ def google_worker():
         if not result:
             time.sleep(1)
             continue
-        domain, watchdomain, score = result
-        log.google_sheets_log(domain, watchdomain, score)
+        domain, watchdomain, score, google_drive_email, google_spreadsheet_url, google_threshold = result
+        log.google_sheets_log(domain, watchdomain, score, google_drive_email, google_spreadsheet_url, google_threshold)
         google_sheets_queue.task_done()
         time.sleep(1)
 

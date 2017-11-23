@@ -24,8 +24,10 @@ pip3 install -r requirements.txt
 
 ### Setup
 
-In order to service your own project, you will need to adapt several of
-the key settings in the *default_settings.py* file.
+In order to service your own project, you will need to create a
+monitoring profile. The simplest way to do this is copy one of the
+existing profiles in the monitoring_profiles directory. After doing so,
+adapt the configuration of the file as outlined below.
 
 #### Domains
 
@@ -36,15 +38,7 @@ similarly named to your domain that you would not like to receive alerts
 for.
 ```
 ...
-####################
-#Domains
-####################
 
-#Domains to monitor
-watchlist = ["myetherwallet.com"]
-
-#Whitelist - do not create alerts for these domains.
-whitelisted_domains = ["ethereum.stackexchange.com"]
 ...
 ```
 
@@ -81,22 +75,18 @@ need to create signed credentials.
 1. Create signed credentials for your google account. (Guide [here](https://gspread.readthedocs.io/en/latest/oauth2.html))
 2. Save these credentials in a file called **creds.json** in the credentials
 directory in this project.
-3. Create a copy of the sprea
-4. Update the following fields in default_settings.py:
+3. Create a copy of the spreadsheet https://docs.google.com/spreadsheets/d/1kLwTQBnhpcRKzYpFeHSh1zqOJMY8H5ESqEwKM0xhnJc/,
+or alternatively create a blank spreadsheet. Ensure that you grant *edit*
+permission to the google account you set in the monitoring profile.
+4. Update the following fields in your monitoring_profile.json file:
 ```
 ...
-####################
-#Google Spreadsheets SOC(Security Operations Centre)
-####################
-
-#Should be writable by the user specified credentials in
-google_spreadsheet_url = ""
-#The user to write changes to the spreadsheet under.
-google_drive_email = ""
-#If anything scores above this, we should send it to the google spreadsheet.
-google_threshold = 75
+  "google_spreadsheet_url" : "https://docs.google.com/spreadsheets/d/<your spreadsheet>",
+  "google_drive_email" : "email@domain.com", #Email to access the spreadsheet as.
+  "google_threshold" : 90, #Domains over this score will be written to the spreadsheet
 ...
 ```
+5. You should be good to
 
 ### Unit tests
 You can ensure that everything is running as intended and setup correctly
@@ -125,6 +115,11 @@ A [homograph](https://en.wikipedia.org/wiki/IDN_homograph_attack) attack
 on MyEtherWallet (note the 'e's).
 
 ![Myetherwallet](https://i.imgur.com/YSTKcCC.png)
+
+### Further assistance
+
+If you would like further assistance with combatting phishing attacks we'd
+be happy to [hear from you](https://www.iosiro.com/contact-us).
 
 ### Thanks
 Thanks to @x0rz https://github.com/x0rz/phishing_catcher for the original inspiration.

@@ -1,7 +1,6 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 
-
 class sheets_api:
     def __init__(self, spreadsheet_url, google_drive_email):
         credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials/creds.json',scopes=['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive'])
@@ -10,6 +9,7 @@ class sheets_api:
         self.spreadsheet = None
         self.spreadsheet_url = spreadsheet_url
         self.first_run = True
+
 
     def add_suspicious_phishing_entry(self, tuple_list):
         '''
@@ -32,15 +32,12 @@ class sheets_api:
             if len(all_records) == 0:
                 #In otherwords, we need to format this worksheet appropriately
                 header_list = [header[0] for header in tuple_list]
-                print ("Adding row.... {}".format(header_list))
                 worksheet.append_row(header_list)
             self.first_run = False
 
 
         #Now we need to add the values.
-        print (tuple_list)
         value_list = [header[1] for header in tuple_list]
-        print ("Adding row.... {}".format(value_list))
         worksheet.append_row(value_list)
         print ("Row added...")
 

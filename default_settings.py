@@ -1,3 +1,5 @@
+auto_lookup_whois = False
+
 bad_repuation_tlds = [
     '.ga',
     '.gq',

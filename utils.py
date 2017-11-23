@@ -13,7 +13,11 @@ def clean_domain(domain):
     :return: cleaned up domain
     '''
     #Lets ensure that it's in an nice string format for idna
-    domain = domain.encode("idna").decode("idna")
+
+    try:
+        domain = domain.encode("idna").decode("idna")
+    except:
+        pass
     domain = domain.strip("*.").strip(".").strip().lower()
     return domain
 

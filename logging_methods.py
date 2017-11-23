@@ -4,6 +4,7 @@ from termcolor import colored
 import datetime
 from utils import whois_lookup
 from tldextract import extract
+from default_settings import auto_lookup_whois
 
 log_suspicious = 'suspicious_domains.log'
 pbar = tqdm.tqdm(desc='certificate_update', unit='cert')
@@ -27,11 +28,13 @@ class logging_methods:
 
         #check if we need to initialise google_sheets.
         if not goog_sheets:
-            goog_sheets = sheets.sheets_api(google_spreadsheet_url)
+            goog_sheets = sheets.sheets_api(google_sheets_url, google_drive_email)
 
         top_level = extract(domain).registered_domain
-
-        whois_data = whois_lookup(top_level)
+        if auto_lookup_whois:
+            whois_data = whois_lookup(top_level)
+        else:
+            whois_data = "https://www.godaddy.com/whois/results.aspx?checkAvail=1&tmskey=&domain={}&prog_id=GoDaddy".format(domain)
         message = [('Date discovered', str(datetime.datetime.now())),('Suspicious Domain', domain), ('Watch domain', watchdomain), ('WHOIS', whois_data), ('Score', score)]
         goog_sheets.add_suspicious_phishing_entry(message)
 

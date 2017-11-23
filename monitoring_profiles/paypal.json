@@ -1,0 +1,15 @@
+{
+  "config_name" : "Paypal",
+
+  "google_spreadsheet_url" : "",
+  "google_drive_email" : "",
+  "google_threshold" : 90,
+
+  "watchlist" : {
+    "paypal.com": {
+      "paypal": 90, "paypalcorp": 50
+    }
+  },
+
+  "whitelisted_domains" : ["paypal.com"]
+}

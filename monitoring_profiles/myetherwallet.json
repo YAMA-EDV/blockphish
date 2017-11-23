@@ -3,14 +3,11 @@
 
   "google_spreadsheet_url" : "",
   "google_drive_email" : "",
-  "google_threshold" : 90,
+  "google_threshold" : 40,
 
   "watchlist" : {
     "myetherwallet.com": {
       "myetherwallet": 100, "myether": 50
-    },
-    "paypal.com": {
-      "paypal": 90, "paypalcorp": 50
     }
   },
 
