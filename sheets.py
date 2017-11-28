@@ -38,7 +38,7 @@ class sheets_api:
             if len(all_records) == 0:
                 #In otherwords, we need to format this worksheet appropriately
                 header_list = [header[0] for header in tuple_list]
-                self.__class__worksheet.append_row(header_list)
+                self.worksheet.append_row(header_list)
             self.first_run = False
 
 
