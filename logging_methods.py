@@ -31,7 +31,8 @@ class logging_methods:
         if score < google_threshold:
             return
 
-        if domain in self.reported_domains:
+        #Don't bother reporting both www.domain.com and domain.com
+        if domain in self.reported_domains or domain.strip("www.") in self.reported_domains:
             return
         else:
             self.reported_domains.add(domain)

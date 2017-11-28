@@ -9,6 +9,7 @@ class sheets_api:
         self.spreadsheet_url = spreadsheet_url
         self.spreadsheet = self.gc.open_by_key(spreadsheet_url)
         self.first_run = True
+        self.worksheet = None
         print ("Initialised sheets")
 
     def add_suspicious_phishing_entry(self, tuple_list):
@@ -20,18 +21,18 @@ class sheets_api:
         print("checking token")
         self.check_token_valid()
         print ("Getting the worksheet...")
-        try:
-            worksheet = self.spreadsheet.worksheet("SSL CERT Detected Domains")
-        except gspread.exceptions.WorksheetNotFound:
-            worksheet = self.spreadsheet.add_worksheet(title="SSL CERT Detected Domains", rows="2", cols="20")
-
         if self.first_run:
+            try:
+                self.worksheet = self.spreadsheet.worksheet("SSL CERT Detected Domains")
+            except gspread.exceptions.WorksheetNotFound:
+                self.worksheet = self.spreadsheet.add_worksheet(title="SSL CERT Detected Domains", rows="2", cols="20")
+
             print ("Fetching current records")
-            all_records = worksheet.get_all_values()
+            all_records = self.worksheet.get_all_values()
             if len(all_records) == 0:
                 #In otherwords, we need to format this worksheet appropriately
                 header_list = [header[0] for header in tuple_list]
-                worksheet.append_row(header_list)
+                self.__class__worksheet.append_row(header_list)
             self.first_run = False
 
 
@@ -41,9 +42,9 @@ class sheets_api:
         #Send this to another proc - TODO handle this with a Queue. This will
         #lead to race condition scenarios if lots of domains need to get written
         #at the same time.
-        p = Process(target=worksheet.append_row, args=(value_list,))
-        p.start()
-        #worksheet.append_row(value_list)
+        #p = Process(target=self.worksheet.append_row, args=(value_list,))
+        #p.start()
+        self.worksheet.append_row(value_list)
         print ("Row added...")
 
     def check_token_valid(self):

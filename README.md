@@ -43,22 +43,29 @@ adapt the configuration of the file as outlined below.
 
 The watchlist variable in settings refers to specific domain(s) that you
 intend to monitor. These will typically be the domain(s) associated with
-your tokensale, project or company. You can also whitelist domains that are
-similarly named to your domain that you would not like to receive alerts
-on by setting the value to 0.
+your tokensale, project or company.
 ```
 ...
 "watchlist" : {
     "myetherwallet.com": {
-      "myetherwallet": 100, "myether": 50, "notmyetherwallet.com" : 0
+      "myetherwallet": 100, "myether": 50
     }
  }
 ...
 ```
 In addition to the domains that you would like to monitor, you can
- associate an arbitrary number of keywords with that domain. In the
- example above, MyEtherWallet also wants to monitor the keywords
+associate an arbitrary number of keywords with that domain. In the
+example above, MyEtherWallet also wants to monitor the keywords
 "myetherwallet" and "myether".
+
+You can also whitelist domains that you do not want to monitor by adding them
+to the whitelist variable in your monitoring profile:
+```
+...
+"whitelisted_domains" : ["myetherwallet.com"]
+...
+```
+
 
 #### Google SOC
 
@@ -79,7 +86,7 @@ directory in this project.
 3. Create a copy of the spreadsheet https://docs.google.com/spreadsheets/d/1kLwTQBnhpcRKzYpFeHSh1zqOJMY8H5ESqEwKM0xhnJc/,
 or alternatively create a blank spreadsheet. Ensure that you grant *edit*
 permission to the google account you set in the monitoring profile.
-4. Update the following fields in your monitoring_profile.json file:
+4. Update the following fields in your monitoring_profiles/monitoring_profile.json file:
 ```
 ...
   "google_spreadsheet_url" : "https://docs.google.com/spreadsheets/d/<your spreadsheet>",
