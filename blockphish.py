@@ -20,6 +20,7 @@ import Levenshtein
 from fuzzywuzzy import fuzz
 import sys
 from multiprocessing import Process
+from unidecode import unidecode
 import json
 
 log = None
@@ -33,24 +34,24 @@ def score_domain(target_domain, watch_domain, keywords):
     :param watch_domain: whether the CA of the certificate is Let's Encrypt
     :return: the score of the domain in question.
     '''
-    #Check to see if IDNA encoded - normally suspicious if so
+    # Check to see if IDNA encoded - normally suspicious if so
     score = 0
-
-    if "xn--" in target_domain:
-        score+=20
 
     target_domain = clean_domain(target_domain)
     watch_domain = clean_domain(watch_domain)
 
+    try:
+        target_domain.encode('ascii')
+    except UnicodeEncodeError:
+        # Contains unicode, suspicious
+        score+=20
+
+    target_domain = unidecode(target_domain)
+
     # If the target domain is the watch domain, don't score it
     if target_domain == watch_domain:
         return 0
-
-    # If the domain is in the whitelist, don't report it
-    for (keyword, value) in keywords.items():
-        if (target_domain == keyword and value == 0):
-            return 0
-
+    
     # If the parsed target domain is the watch domain, but with a different TLD, very suspicious
     if remove_tld(watch_domain) == remove_tld(target_domain):
         return 100
@@ -74,6 +75,7 @@ def score_domain(target_domain, watch_domain, keywords):
     if watch_domain in target_domain:
         return 100
 
+    # TODO: keyword functionality is temporarily disabled
     # score += fuzzy_scorer_keywords(keywords, remove_tld(target_domain))
     # print(fuzzy_scorer_keywords(keywords, remove_tld(target_domain)))
 
@@ -97,6 +99,11 @@ def score_domain(target_domain, watch_domain, keywords):
     # Detect unreliable TLDs
     if any(target_domain.endswith(bad_tld) for bad_tld in bad_repuation_tlds) :
         score += 20
+
+    # If the target domain isn't split by .'s then check if it's too long to realistically look like the watch domain
+    if "." not in remove_tld(target_domain):
+        if len(target_domain) > len(watch_domain) * 1.5:
+            score /= 2
 
     return score
 

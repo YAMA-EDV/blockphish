@@ -111,12 +111,12 @@ python3 -m unittest discover -s tests/ -p '*_test.py'
 ### Usage
 
 ```
-$ python3 blockphish.py monitoring_profile/profile.json
+$ python3 blockphish.py monitoring_profiles/profile.json
 ```
 
 ### Examples of suspicious domains
 
-A clear clone of an existing well known brand with minor changes:
+An obvious clone of an existing well known brand with minor changes:
 
 ![Blockchain.info Clone](https://i.imgur.com/EBHn2VU.png)
 
