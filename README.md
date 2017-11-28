@@ -85,7 +85,7 @@ need to create signed credentials.
 1. Create signed credentials for your google account. (Guide [here](https://gspread.readthedocs.io/en/latest/oauth2.html))
 2. Save these credentials in a file called **creds.json** in the credentials
 directory in this project.
-3. Create a copy of the spreadsheet https://docs.google.com/spreadsheets/d/1kLwTQBnhpcRKzYpFeHSh1zqOJMY8H5ESqEwKM0xhnJc/,
+3. Create a copy of the spreadsheet https://docs.google.com/spreadsheets/d/17efqX2ubePcEghFbyOuFYIuHrPzQf2uxND1yKBgRKLc/,
 or alternatively create a blank spreadsheet. Ensure that you grant *edit*
 permission to the spreadsheet by the email address in your google creds.json.
 4. Update the following fields in your monitoring_profiles/monitoring_profile.json file:
