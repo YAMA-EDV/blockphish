@@ -26,12 +26,9 @@ class sheets_api:
                 self.worksheet = self.spreadsheet.worksheet("SSL CERT Detected Domains")
             except gspread.exceptions.WorksheetNotFound:
                 self.spreadsheet.add_worksheet(title="SSL CERT Detected Domains", rows="2", cols="20")
-                self.worksheet = sh.worksheet("SSL CERT Detected Domains")
+                self.worksheet = self.spreadsheet.worksheet("SSL CERT Detected Domains")
 
             values_list = self.worksheet.row_values(1)
-            print(dir(self.worksheet))
-            print (values_list)
-
 
             print ("Fetching current records")
             try:
@@ -48,32 +45,26 @@ class sheets_api:
         #Now we need to add the values.
         value_list = [header[1] for header in tuple_list]
 
-        #Send this to another proc - TODO handle this with a Queue. This will
-        #lead to race condition scenarios if lots of domains need to get written
-        #at the same time.
-        #p = Process(target=self.worksheet.append_row, args=(value_list,))
-        #p.start()
-        #t = Thread(target=self.worksheet.append_row, args=(value_list,))
-        #t.start()
+        #Send this to another proc - TODO handle this with a Queue.
         self.worksheet.append_row(value_list)
         print ("Row added...")
 
     def check_token_valid(self):
-    #try:
-        #This is to intialise the spreadsheet if it's the first time running this code.
-        if not self.spreadsheet:
-            print("initiase sheets")
-            self.spreadsheet = self.gc.open_by_url(self.spreadsheet_url)
-            return True
+        try:
+            #This is to intialise the spreadsheet if it's the first time running this code.
+            if not self.spreadsheet:
+                print("initiase sheets")
+                self.spreadsheet = self.gc.open_by_url(self.spreadsheet_url)
+                return True
 
-        #This is to check whether we still have access to the spreadsheet.
-        if self.credentials.access_token_expired:
-            print("refresh token")
-            self.gc.login()
-            self.spreadsheet = self.gc.open_by_url(self.spreadsheet_url)
-            return True
+            #This is to check whether we still have access to the spreadsheet.
+            if self.credentials.access_token_expired:
+                print("refresh token")
+                self.gc.login()
+                self.spreadsheet = self.gc.open_by_url(self.spreadsheet_url)
+                return True
 
-    #except Exception as e:
-    #    print (e)
-    #    print ("ERROR")
-    #    return False
+        except Exception as e:
+            print (e)
+            print ("ERROR")
+            return False

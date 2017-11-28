@@ -2,7 +2,6 @@
   "config_name" : "MyEtherWallet",
 
   "google_spreadsheet_key" : "",
-  "google_drive_email" : "",
   "google_threshold" : 90,
 
   "watchlist" : {

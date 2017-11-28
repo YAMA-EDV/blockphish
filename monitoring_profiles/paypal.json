@@ -2,7 +2,6 @@
   "config_name" : "Paypal",
 
   "google_spreadsheet_key" : "17efqX2ubePcEghFbyOuFYIuHrPzQf2uxND1yKBgRKLc",
-  "google_drive_email" : "matt@zenoic.com",
   "google_threshold" : 50,
 
   "watchlist" : {

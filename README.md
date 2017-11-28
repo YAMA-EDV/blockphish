@@ -61,6 +61,7 @@ example above, MyEtherWallet also wants to monitor the keywords
 
 You can also whitelist domains that you do not want to monitor by adding them
 to the whitelist variable in your monitoring profile:
+
 ```
 ...
 "whitelisted_domains" : ["myetherwallet.com"]
@@ -86,13 +87,12 @@ need to create signed credentials.
 directory in this project.
 3. Create a copy of the spreadsheet https://docs.google.com/spreadsheets/d/1kLwTQBnhpcRKzYpFeHSh1zqOJMY8H5ESqEwKM0xhnJc/,
 or alternatively create a blank spreadsheet. Ensure that you grant *edit*
-permission to the spreadsheet by the google account you set in the monitoring profile.
+permission to the spreadsheet by the email address in your google creds.json.
 4. Update the following fields in your monitoring_profiles/monitoring_profile.json file:
 ```
 ...
   "google_spreadsheet_key" : "<your spreadsheet key>", #This is the value from the URL
                                                       #https://docs.google.com/spreadsheets/d/<KEY>/
-  "google_drive_email" : "email@domain.com", #Account to access the spreadsheet as.
   "google_threshold" : 90, #Domains over this score will be written to the spreadsheet
 ...
 ```
