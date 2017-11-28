@@ -93,20 +93,13 @@ class test_main(unittest.TestCase):
         score = blockphish.score_domain(domain, watch_domain, {'paypal':75, 'paypalcorp':50})
         print ("Domain: {} Watch Domain: {} Score: {}".format(domain, watch_domain, score))
         self.assertLess(score, 60, "domain in the watch_domain not flagging")
-       
-        # Check for whitelist
-        domain = "test.my.paypel-domain.com.co.za"
-        watch_domain = "paypal.com"
-        score = blockphish.score_domain(domain, watch_domain, {'test.my.paypel-domain.com.co.za':0})
-        print ("Domain: {} Watch Domain: {} Score: {}".format(domain, watch_domain, score))
-        self.assertEqual(score, 0, "domain in the watch_domain not flagging")
         
         # Check for unicode
         domain = "test.my.pӓypӓl-domӓin.com.co.za"
         watch_domain = "paypal.com"
         score = blockphish.score_domain(domain, watch_domain, {'test.my.paypel-domain.com.co.za':0})
         print ("Domain: {} Watch Domain: {} Score: {}".format(domain, watch_domain, score))
-        self.assertGreater(score, 20, "domain in the watch_domain not flagging")
+        self.assertGreater(score, 100, "domain in the watch_domain not flagging")
         
         # Check for similar but longer
         domain = "payinpal.com"
@@ -152,6 +145,13 @@ class test_main(unittest.TestCase):
 
         # Check for no match
         domain = "shuswapconcretefinishing.com"
+        watch_domain = "wacoin.com"
+        score = blockphish.score_domain(domain, watch_domain, {'asdfaaadsf':80})
+        print ("Domain: {} Watch Domain: {} Score: {}".format(domain, watch_domain, score))
+        self.assertLess(score, 50, "domain in the watch_domain not flagging")
+
+        # Check for no match
+        domain = "www.shuswapconcretefinishing.com"
         watch_domain = "wacoin.com"
         score = blockphish.score_domain(domain, watch_domain, {'asdfaaadsf':80})
         print ("Domain: {} Watch Domain: {} Score: {}".format(domain, watch_domain, score))

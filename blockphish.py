@@ -101,9 +101,13 @@ def score_domain(target_domain, watch_domain, keywords):
         score += 20
 
     # If the target domain isn't split by .'s then check if it's too long to realistically look like the watch domain
-    if "." not in remove_tld(target_domain):
-        if len(target_domain) > len(watch_domain) * 1.5:
-            score /= 2
+    try:
+        max_segment_target_domain = len(max(remove_tld(target_domain).replace("-", ".").split("."), key=len))
+    except Exception as e:
+        max_segment_target_domain = len(remove_tld(target_domain))
+
+    if max_segment_target_domain > len(remove_tld(watch_domain)) * 1.5:
+        score /= 2
 
     return score
 
