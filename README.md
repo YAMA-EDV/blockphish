@@ -85,12 +85,13 @@ need to create signed credentials.
 directory in this project.
 3. Create a copy of the spreadsheet https://docs.google.com/spreadsheets/d/1kLwTQBnhpcRKzYpFeHSh1zqOJMY8H5ESqEwKM0xhnJc/,
 or alternatively create a blank spreadsheet. Ensure that you grant *edit*
-permission to the google account you set in the monitoring profile.
+permission to the spreadsheet by the google account you set in the monitoring profile.
 4. Update the following fields in your monitoring_profiles/monitoring_profile.json file:
 ```
 ...
-  "google_spreadsheet_url" : "https://docs.google.com/spreadsheets/d/<your spreadsheet>",
-  "google_drive_email" : "email@domain.com", #Email to access the spreadsheet as.
+  "google_spreadsheet_url" : "<your spreadsheet id>", #This is the value from the URL
+                                                      #https://docs.google.com/spreadsheets/d/<KEY>/
+  "google_drive_email" : "email@domain.com", #Account to access the spreadsheet as.
   "google_threshold" : 90, #Domains over this score will be written to the spreadsheet
 ...
 ```
