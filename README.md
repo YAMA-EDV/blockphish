@@ -89,7 +89,7 @@ permission to the spreadsheet by the google account you set in the monitoring pr
 4. Update the following fields in your monitoring_profiles/monitoring_profile.json file:
 ```
 ...
-  "google_spreadsheet_url" : "<your spreadsheet id>", #This is the value from the URL
+  "google_spreadsheet_key" : "<your spreadsheet key>", #This is the value from the URL
                                                       #https://docs.google.com/spreadsheets/d/<KEY>/
   "google_drive_email" : "email@domain.com", #Account to access the spreadsheet as.
   "google_threshold" : 90, #Domains over this score will be written to the spreadsheet
