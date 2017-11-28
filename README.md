@@ -7,7 +7,8 @@ cryptocurrency space, with increasingly sophisticated groups targeting
 their victims across Slack, Telegram, forums, as well as email. This
 project streams newly registered SSL certificates using
 [certstream](https://certstream.calidog.io/) and attempts to identify
-suspicious domains based on keywords set by the user in near real time.
+suspicious domains based on keywords set by the user in near real time. You can
+read about it in more detail in our [blog post](https://www.iosiro.com/blog/blockphish).
 
 ![usage](https://i.imgur.com/4BGuXkR.gif)
 
