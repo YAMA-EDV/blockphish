@@ -19,10 +19,10 @@ import time
 import Levenshtein
 from fuzzywuzzy import fuzz
 import sys
+from multiprocessing import Process
 import json
 
-google_sheets_queue = Queue()
-log = logging_methods.logging_methods()
+log = None
 
 def score_domain(target_domain, watch_domain, keywords):
     '''
@@ -33,11 +33,14 @@ def score_domain(target_domain, watch_domain, keywords):
     :param watch_domain: whether the CA of the certificate is Let's Encrypt
     :return: the score of the domain in question.
     '''
+    #Check to see if IDNA encoded - normally suspicious if so
+    score = 0
+
+    if "xn--" in target_domain:
+        score+=20
 
     target_domain = clean_domain(target_domain)
     watch_domain = clean_domain(watch_domain)
-
-    score = 0
 
     # If the target domain is the watch domain, don't score it
     if target_domain == watch_domain:
@@ -48,40 +51,40 @@ def score_domain(target_domain, watch_domain, keywords):
         if (target_domain == keyword and value == 0):
             return 0
 
-    # If the parsed target domain is the watch domain, but with a different TLD, very suspicious 
+    # If the parsed target domain is the watch domain, but with a different TLD, very suspicious
     if remove_tld(watch_domain) == remove_tld(target_domain):
         return 100
 
-    # If the parsed watch domain is in the target domain, but they aren't equal, suspicious 
+    # If the parsed watch domain is in the target domain, but they aren't equal, suspicious
     if remove_tld(watch_domain) in target_domain:
         score = 70
 
     # If they have a low levenshtein distance, suspicious
     l_distance = Levenshtein.distance(remove_tld(watch_domain),remove_tld(target_domain))
     fuzz_ratio = fuzz.token_sort_ratio(remove_tld(watch_domain),remove_tld(target_domain))
-    
+
     # Works for both short and long strings
     if l_distance <= 2:
         score = 70 + 10 * (2-l_distance)
-    # Better with longer strings   
+    # Better with longer strings
     elif fuzz_ratio > 80:
-        score = fuzz_ratio - 25 
-    
+        score = fuzz_ratio - 25
+
     # If the watch domain is in the target domain, but they aren't equal, suspicious
     if watch_domain in target_domain:
         return 100
-     
+
     # score += fuzzy_scorer_keywords(keywords, remove_tld(target_domain))
     # print(fuzzy_scorer_keywords(keywords, remove_tld(target_domain)))
-    
+
     target_len = len(remove_tld(target_domain))
     watch_len = len(remove_tld(watch_domain))
-    
+
     # If the target domain is much shorter than the watch domain, it's probably not much of a threat
     if target_len > watch_len / 2 and target_len > 4:
-        # Detect the presence of the watch domain in the target domain 
+        # Detect the presence of the watch domain in the target domain
         score += fuzzy_scorer_domain(remove_tld(watch_domain), remove_tld(target_domain)) * 0.95
-    
+
     # Detect suspicious domain structure
     # Remove initial '*.' for wildcard certificates
     if target_domain.startswith('*.'):
@@ -91,7 +94,7 @@ def score_domain(target_domain, watch_domain, keywords):
         if any(fake_tld in remove_tld(target_domain) for fake_tld in ['com', 'net', 'org', 'io']):
             score += 20
 
-    # Detect unreliable TLDs 
+    # Detect unreliable TLDs
     if any(target_domain.endswith(bad_tld) for bad_tld in bad_repuation_tlds) :
         score += 20
 
@@ -119,10 +122,20 @@ def handle_score_and_log(domain, watchdomain, score):
     :param score:
     :return:
     '''
+    global log
+
+    if not log and google_spreadsheet_key and len(google_spreadsheet_key):
+        log = logging_methods.logging_methods(google_drive_email, google_spreadsheet_key)
+    elif not log:
+        log = logging_methods.logging_methods()
+
     log.console_log(domain, watchdomain, score)
-    if google_spreadsheet_url and len(google_spreadsheet_url) > 0:
-        google_sheets_queue.put((domain, watchdomain, score, google_drive_email, google_spreadsheet_url, google_threshold ))
-        #log.google_sheets_log(domain, watchdomain, score,google_drive_email, google_spreadsheet_url, google_threshold)
+    if google_spreadsheet_key and len(google_spreadsheet_key) > 0:
+        #google_sheets_queue.put((domain, watchdomain, score, google_drive_email, google_spreadsheet_key, google_threshold ))
+        log.google_sheets_log(domain, watchdomain, score, google_drive_email, google_spreadsheet_key, google_threshold)
+        #p = Process(target=log.google_sheets_log, args=(domain, watchdomain,
+        # score, google_drive_email, google_spreadsheet_key, google_threshold,))
+        #p.start()
 
 def callback(message, context):
     """Callback handler for certstream events."""
@@ -147,30 +160,11 @@ def callback(message, context):
 
                 handle_score_and_log(clean_domain(domain), clean_domain(watch_domain), score)
 
-def google_worker():
-    '''
-    This is the thread worker that will post data to sheets on our behalf.
-    :return:
-    '''
-    while True:
-        result = google_sheets_queue.get()
-        if not result:
-            time.sleep(1)
-            continue
-        domain, watchdomain, score, google_drive_email, google_spreadsheet_url, google_threshold = result
-        log.google_sheets_log(domain, watchdomain, score, google_drive_email, google_spreadsheet_url, google_threshold)
-        google_sheets_queue.task_done()
-        time.sleep(1)
 
 def main(config_file):
     load_config_file(config_file)
-    # Spawn our google thread worker
-    if google_spreadsheet_url and len(google_spreadsheet_url) > 0:
-            print ("Spawning google sheets thread")
-            t = threading.Thread(target=google_worker)
-            t.start()
-
     # Start streaming certificates
+    print ("Starting to stream certificates... this can take a few minutes...")
     certstream.listen_for_events(callback)
     print()
 

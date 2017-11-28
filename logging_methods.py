@@ -5,12 +5,17 @@ import datetime
 from utils import whois_lookup
 from tldextract import extract
 from default_settings import auto_lookup_whois
-
+from multiprocessing import Process
 log_suspicious = 'suspicious_domains.log'
 pbar = tqdm.tqdm(desc='certificate_update', unit='cert')
-goog_sheets = None
 
 class logging_methods:
+    def __init__(self, google_drive_email=None, google_sheets_url=None):
+        if google_drive_email and google_sheets_url:
+            print (google_drive_email)
+            print (google_sheets_url)
+            self.goog_sheets = sheets.sheets_api(google_sheets_url, google_drive_email)
+
     def google_sheets_log(self, domain, watchdomain, score, google_drive_email, google_sheets_url, google_threshold):
         '''
         This function is a wrapper for logging to google sheets.
@@ -20,23 +25,22 @@ class logging_methods:
         :param score: score
         :return: Nothing.
         '''
-        global goog_sheets
 
         #If score below threshold.
         if score < google_threshold:
             return
 
         #check if we need to initialise google_sheets.
-        if not goog_sheets:
-            goog_sheets = sheets.sheets_api(google_sheets_url, google_drive_email)
+        if not self.goog_sheets:
+            self.goog_sheets = sheets.sheets_api(google_sheets_url, google_drive_email)
 
         top_level = extract(domain).registered_domain
         if auto_lookup_whois:
             whois_data = whois_lookup(top_level)
         else:
             whois_data = "https://www.godaddy.com/whois/results.aspx?checkAvail=1&tmskey=&domain={}&prog_id=GoDaddy".format(domain)
-        message = [('Date discovered', str(datetime.datetime.now())),('Suspicious Domain', domain), ('Watch domain', watchdomain), ('WHOIS', whois_data), ('Score', score)]
-        goog_sheets.add_suspicious_phishing_entry(message)
+        message = [('Date discovered', str(datetime.datetime.now())),('Suspicious Domain', domain), ('Watch domain', watchdomain), ('Score', score), ('WHOIS', whois_data)]
+        self.goog_sheets.add_suspicious_phishing_entry(message)
 
     def console_log(self, domain, watchdomain, score):
         '''

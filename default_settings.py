@@ -38,5 +38,7 @@ bad_repuation_tlds = [
     '.party',
     '.tech',
     '.science',
-    '.business'
+    '.business',
+    '.online',
+    '.club'
 ]

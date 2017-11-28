@@ -6,10 +6,10 @@ class sheets_api:
         credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials/creds.json',scopes=['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive'])
         self.delegated_credentials = credentials.create_delegated(google_drive_email)
         self.gc = gspread.authorize(self.delegated_credentials)
-        self.spreadsheet = None
         self.spreadsheet_url = spreadsheet_url
+        self.spreadsheet = self.gc.open_by_key(spreadsheet_url)
         self.first_run = True
-
+        print ("Initialised sheets")
 
     def add_suspicious_phishing_entry(self, tuple_list):
         '''
@@ -17,14 +17,13 @@ class sheets_api:
 
         [("IPAddress", "91.23.12.1", "User-Agent", "Mac OS Mozilla/1.1"),...]
         '''
-
+        print("checking token")
         self.check_token_valid()
         print ("Getting the worksheet...")
         try:
-            worksheet = self.spreadsheet.get_worksheet(0)
+            worksheet = self.spreadsheet.worksheet("SSL CERT Detected Domains")
         except gspread.exceptions.WorksheetNotFound:
-            print("Error: Could not find a worksheet with the name 'Detected Domains. Please clone the spreadsheet listed on the git page.")
-            raise gspread.exceptions.WorksheetNotFound
+            worksheet = sh.add_worksheet(title="SSL CERT Detected Domains", rows="2", cols="20")
 
         if self.first_run:
             print ("Fetching current records")
@@ -43,17 +42,21 @@ class sheets_api:
 
     def check_token_valid(self):
         try:
+            print ("HERE REFRESH")
+            #This is to intialise the spreadsheet if it's the first time running this code.
+            if not self.spreadsheet:
+                print("initiase sheets")
+                self.spreadsheet = self.gc.open_by_url(self.spreadsheet_url)
+                return True
+
             #This is to check whether we still have access to the spreadsheet.
             if self.delegated_credentials.access_token_expired:
+                print("refresh token")
                 self.gc.login()
                 self.spreadsheet = self.gc.open_by_url(self.spreadsheet_url)
                 return True
-
-            #This is to intialise the spreadsheet if it's the first time running this code.
-            if not self.spreadsheet:
-                self.spreadsheet = self.gc.open_by_url(self.spreadsheet_url)
-                return True
-
+            print ("DONE REFRESH")
         except Exception as e:
             print (e)
+            print ("ERROR")
             return False

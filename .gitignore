@@ -49,5 +49,8 @@ dev_settings.py
 #TLDS
 .tlds
 
+#Private monitoring
+private_monitoring_profiles/
+
 # vscode
 .vscode
