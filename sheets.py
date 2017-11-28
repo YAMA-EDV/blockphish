@@ -1,6 +1,6 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
-
+from multiprocessing import Process
 class sheets_api:
     def __init__(self, spreadsheet_url, google_drive_email):
         credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials/creds.json',scopes=['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive'])
@@ -23,7 +23,7 @@ class sheets_api:
         try:
             worksheet = self.spreadsheet.worksheet("SSL CERT Detected Domains")
         except gspread.exceptions.WorksheetNotFound:
-            worksheet = sh.add_worksheet(title="SSL CERT Detected Domains", rows="2", cols="20")
+            worksheet = self.spreadsheet.add_worksheet(title="SSL CERT Detected Domains", rows="2", cols="20")
 
         if self.first_run:
             print ("Fetching current records")
@@ -37,12 +37,17 @@ class sheets_api:
 
         #Now we need to add the values.
         value_list = [header[1] for header in tuple_list]
-        worksheet.append_row(value_list)
+
+        #Send this to another proc - TODO handle this with a Queue. This will
+        #lead to race condition scenarios if lots of domains need to get written
+        #at the same time.
+        p = Process(target=worksheet.append_row, args=(value_list,))
+        p.start()
+        #worksheet.append_row(value_list)
         print ("Row added...")
 
     def check_token_valid(self):
         try:
-            print ("HERE REFRESH")
             #This is to intialise the spreadsheet if it's the first time running this code.
             if not self.spreadsheet:
                 print("initiase sheets")
@@ -55,7 +60,7 @@ class sheets_api:
                 self.gc.login()
                 self.spreadsheet = self.gc.open_by_url(self.spreadsheet_url)
                 return True
-            print ("DONE REFRESH")
+
         except Exception as e:
             print (e)
             print ("ERROR")

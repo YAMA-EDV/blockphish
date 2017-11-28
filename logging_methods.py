@@ -15,6 +15,7 @@ class logging_methods:
             print (google_drive_email)
             print (google_sheets_url)
             self.goog_sheets = sheets.sheets_api(google_sheets_url, google_drive_email)
+        self.reported_domains = set()
 
     def google_sheets_log(self, domain, watchdomain, score, google_drive_email, google_sheets_url, google_threshold):
         '''
@@ -29,6 +30,11 @@ class logging_methods:
         #If score below threshold.
         if score < google_threshold:
             return
+
+        if domain in self.reported_domains:
+            return
+        else:
+            self.reported_domains.add(domain)
 
         #check if we need to initialise google_sheets.
         if not self.goog_sheets:
