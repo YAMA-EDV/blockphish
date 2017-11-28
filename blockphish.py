@@ -11,7 +11,7 @@
 # GNU General Public License for more details.
 import certstream
 from default_settings import bad_repuation_tlds
-from utils import clean_domain, remove_tld, fuzzy_scorer_domain, fuzzy_scorer_keywords
+from utils import clean_domain, remove_tld, fuzzy_scorer_domain, fuzzy_scorer_keywords, is_whitelisted
 import logging_methods
 from queue import Queue
 import threading
@@ -51,7 +51,7 @@ def score_domain(target_domain, watch_domain, keywords):
     # If the target domain is the watch domain, don't score it
     if target_domain == watch_domain:
         return 0
-    
+
     # If the parsed target domain is the watch domain, but with a different TLD, very suspicious
     if remove_tld(watch_domain) == remove_tld(target_domain):
         return 100
@@ -155,8 +155,13 @@ def callback(message, context):
         # Loop through all of the domains found in the cert
         for domain in all_domains:
 
+            #Is the domain whitelisted
+            if is_whitelisted(domain, whitelisted_domains):
+                continue
+
             # Loop through each of the domains that we're watching
             for watch_domain in watchlist.keys():
+
                 lets_encrypt = False
                 keywords = watchlist[watch_domain]
                 score = score_domain(domain.lower(), watch_domain, keywords)

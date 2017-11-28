@@ -46,6 +46,7 @@ class logging_methods:
             whois_data = whois_lookup(top_level)
         else:
             whois_data = "https://www.godaddy.com/whois/results.aspx?checkAvail=1&tmskey=&domain={}&prog_id=GoDaddy".format(domain)
+        #print (message)
         message = [('Date discovered', str(datetime.datetime.now())),('Suspicious Domain', domain), ('Watch domain', watchdomain), ('Score', score), ('WHOIS', whois_data)]
         self.goog_sheets.add_suspicious_phishing_entry(message)
 

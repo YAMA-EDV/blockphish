@@ -21,6 +21,16 @@ def clean_domain(domain):
     domain = domain.strip("*.").strip(".").strip().lower()
     return domain
 
+def is_whitelisted(domain, whitelist):
+    '''
+    Is the domain in our whitelist from the config file.
+    '''
+    cleaned_domain = clean_domain(domain)
+    for white in whitelist:
+        if domain.endswith(white):
+            return True
+    return False
+
 def whois_lookup(domain):
     try:
         whois_data = pythonwhois.net.get_whois_raw(domain)
@@ -67,10 +77,13 @@ def remove_tld(domain) :
     :param domain:
     :return:
     '''
+    try:
     # Remove the tlds
-    tld = extract(domain).suffix
-    domain = ''.join(domain.rsplit(tld, 1)).strip('.')
-
+        tld = extract(domain).suffix
+        domain = ''.join(domain.rsplit(tld, 1)).strip('.')
+    except Exception as e:
+        #print ("Error Stripping TLD {}: domain is ".format(e, domain))
+        pass
     return domain
 
 
@@ -85,7 +98,7 @@ def fuzzy_scorer_domain(domain, target):
     :param target: The potential phishing domain.
     :return: a float representing the score.
     '''
-    
+
     score = 0
 
     # Find the shorter string
@@ -93,11 +106,11 @@ def fuzzy_scorer_domain(domain, target):
 
     # Set the window length equal to the shorter string
     window_length = len(shorter)
-    
+
     # Set the number of times to move the window
     num_iterations = len(longer)-len(shorter)+1
 
-    # Find the Levenshtein distance 
+    # Find the Levenshtein distance
     for position in range(0, num_iterations):
         window = longer[position:position+window_length]
         l_ratio = Levenshtein.ratio(window, shorter) * 100
@@ -108,14 +121,14 @@ def fuzzy_scorer_domain(domain, target):
             result = l_ratio
         if result > score:
             score = result
-    
+
     simple = fuzz.ratio(domain, target)
     partial = fuzz.partial_ratio(domain, target)
     sort = fuzz.token_sort_ratio(domain, target)
     set_ratio = fuzz.token_set_ratio(domain, target)
-    
+
     score = max([score, simple, partial, sort, set_ratio])
-    
+
     # Only looking for strings that are quite similar, anything less than that is noise
     if score < 75:
         score = 0
@@ -132,7 +145,7 @@ def fuzzy_scorer_keywords(keywords, target):
     :param target: The potential phishing domain.
     :return: a float representing the score.
     '''
-    
+
     score = 0
     value = 0
 
@@ -142,11 +155,11 @@ def fuzzy_scorer_keywords(keywords, target):
 
         # Set the window length equal to the shorter string
         window_length = len(shorter)
-        
+
         # Set the number of times to move the window
         num_iterations = len(longer)-len(shorter)+1
 
-        # Find the Levenshtein distance 
+        # Find the Levenshtein distance
         for position in range(0, num_iterations):
             window = longer[position:position+window_length]
             l_ratio = Levenshtein.ratio(window, shorter) * 100
@@ -157,12 +170,12 @@ def fuzzy_scorer_keywords(keywords, target):
                 result = l_ratio
             if result > score:
                 score = result
-        
+
         simple = fuzz.ratio(keyword, target)
         partial = fuzz.partial_ratio(keyword, target)
         sort = fuzz.token_sort_ratio(keyword, target)
         set_ratio = fuzz.token_set_ratio(keyword, target)
-        
+
         old_score = score
 
         score = max([score, simple, partial, sort, set_ratio])
@@ -171,7 +184,7 @@ def fuzzy_scorer_keywords(keywords, target):
             value = value
 
     score = (score - 15) * (value / 100) / 2
-    
+
     if score < 60:
         score = 0
 

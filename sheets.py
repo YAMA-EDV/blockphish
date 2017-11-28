@@ -1,6 +1,7 @@
 import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from multiprocessing import Process
+from threading import Thread
 class sheets_api:
     def __init__(self, spreadsheet_url, google_drive_email):
         credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials/creds.json',scopes=['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive'])
@@ -44,25 +45,27 @@ class sheets_api:
         #at the same time.
         #p = Process(target=self.worksheet.append_row, args=(value_list,))
         #p.start()
+        #t = Thread(target=self.worksheet.append_row, args=(value_list,))
+        #t.start()
         self.worksheet.append_row(value_list)
         print ("Row added...")
 
     def check_token_valid(self):
-        try:
-            #This is to intialise the spreadsheet if it's the first time running this code.
-            if not self.spreadsheet:
-                print("initiase sheets")
-                self.spreadsheet = self.gc.open_by_url(self.spreadsheet_url)
-                return True
+    #try:
+        #This is to intialise the spreadsheet if it's the first time running this code.
+        if not self.spreadsheet:
+            print("initiase sheets")
+            self.spreadsheet = self.gc.open_by_url(self.spreadsheet_url)
+            return True
 
-            #This is to check whether we still have access to the spreadsheet.
-            if self.delegated_credentials.access_token_expired:
-                print("refresh token")
-                self.gc.login()
-                self.spreadsheet = self.gc.open_by_url(self.spreadsheet_url)
-                return True
+        #This is to check whether we still have access to the spreadsheet.
+        if self.delegated_credentials.access_token_expired:
+            print("refresh token")
+            self.gc.login()
+            self.spreadsheet = self.gc.open_by_url(self.spreadsheet_url)
+            return True
 
-        except Exception as e:
-            print (e)
-            print ("ERROR")
-            return False
+    #except Exception as e:
+    #    print (e)
+    #    print ("ERROR")
+    #    return False
