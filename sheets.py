@@ -4,9 +4,8 @@ from multiprocessing import Process
 from threading import Thread
 class sheets_api:
     def __init__(self, spreadsheet_url, google_drive_email):
-        credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials/creds.json',scopes=['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive'])
-        self.delegated_credentials = credentials.create_delegated(google_drive_email)
-        self.gc = gspread.authorize(self.delegated_credentials)
+        self.credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials/creds.json',scopes=['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive'])
+        self.gc = gspread.authorize(self.credentials)
         self.spreadsheet_url = spreadsheet_url
         self.spreadsheet = self.gc.open_by_key(spreadsheet_url)
         self.first_run = True
@@ -26,10 +25,19 @@ class sheets_api:
             try:
                 self.worksheet = self.spreadsheet.worksheet("SSL CERT Detected Domains")
             except gspread.exceptions.WorksheetNotFound:
-                self.worksheet = self.spreadsheet.add_worksheet(title="SSL CERT Detected Domains", rows="2", cols="20")
+                self.spreadsheet.add_worksheet(title="SSL CERT Detected Domains", rows="2", cols="20")
+                self.worksheet = sh.worksheet("SSL CERT Detected Domains")
+
+            values_list = self.worksheet.row_values(1)
+            print(dir(self.worksheet))
+            print (values_list)
+
 
             print ("Fetching current records")
-            all_records = self.worksheet.get_all_values()
+            try:
+                all_records = self.worksheet.get_all_values()
+            except:
+                all_records = []
             if len(all_records) == 0:
                 #In otherwords, we need to format this worksheet appropriately
                 header_list = [header[0] for header in tuple_list]
@@ -59,7 +67,7 @@ class sheets_api:
             return True
 
         #This is to check whether we still have access to the spreadsheet.
-        if self.delegated_credentials.access_token_expired:
+        if self.credentials.access_token_expired:
             print("refresh token")
             self.gc.login()
             self.spreadsheet = self.gc.open_by_url(self.spreadsheet_url)
