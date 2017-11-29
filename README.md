@@ -57,7 +57,7 @@ your tokensale, project or company.
 In addition to the domains that you would like to monitor, you can
 associate an arbitrary number of keywords with that domain. In the
 example above, MyEtherWallet also wants to monitor the keywords
-"myetherwallet" and "myether".
+"mew" and "".
 
 You can also whitelist domains that you do not want to monitor by adding them
 to the whitelist variable in your monitoring profile:
@@ -101,6 +101,11 @@ You should now start seeing domains that score over the specified
 threshold being written to your spreadsheet. [Setup email notifications](https://support.google.com/docs/answer/91588?co=GENIE.Platform%3DDesktop&hl=en)
 on the spreadsheet to receive notifications any time the program writes
 to the spreadsheet.
+
+### WHOIS
+
+By default, WHOIS lookups on suspicious domains are turned off, but you can
+enable this in the default_settings.py file.
 
 ### Unit tests
 You can ensure that everything is running as intended and setup correctly
