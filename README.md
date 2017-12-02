@@ -26,6 +26,7 @@ You will need the following python packages installed:
 * python_Levenshtein
 * gspread
 * fuzzywuzzy
+* pythonwhois
 
 To install the packages run:
 
