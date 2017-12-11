@@ -2,8 +2,11 @@ import gspread
 from oauth2client.service_account import ServiceAccountCredentials
 from multiprocessing import Process
 from threading import Thread
+import logging
+logger = logging.Logger("Sheets")
 class sheets_api:
-    def __init__(self, spreadsheet_url):
+    def __init__(self, spreadsheet_url, config_name):
+        self.config_name = config_name
         self.credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials/creds.json',scopes=['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive'])
         self.gc = gspread.authorize(self.credentials)
         self.spreadsheet_url = spreadsheet_url
@@ -21,12 +24,14 @@ class sheets_api:
         print("checking token")
         self.check_token_valid()
         print ("Getting the worksheet...")
+        logger.info("Fetched worksheet..")
         if self.first_run:
             try:
-                self.worksheet = self.spreadsheet.worksheet("SSL CERT Detected Domains")
+                self.worksheet = self.spreadsheet.worksheet("SSL CERT Detect - {}".format(self.config_name))
             except gspread.exceptions.WorksheetNotFound:
-                self.spreadsheet.add_worksheet(title="SSL CERT Detected Domains", rows="2", cols="20")
-                self.worksheet = self.spreadsheet.worksheet("SSL CERT Detected Domains")
+                print("Error...")
+                self.spreadsheet.add_worksheet(title="SSL CERT Detect - {}".format(self.config_name), rows="1", cols="10")
+                self.worksheet = self.spreadsheet.worksheet("SSL CERT Detect - {}".format(self.config_name))
 
             values_list = self.worksheet.row_values(1)
 
@@ -54,14 +59,14 @@ class sheets_api:
             #This is to intialise the spreadsheet if it's the first time running this code.
             if not self.spreadsheet:
                 print("initiase sheets")
-                self.spreadsheet = self.gc.open_by_url(self.spreadsheet_url)
+                self.spreadsheet = self.gc.open_by_key(self.spreadsheet_url)
                 return True
 
             #This is to check whether we still have access to the spreadsheet.
             if self.credentials.access_token_expired:
                 print("refresh token")
                 self.gc.login()
-                self.spreadsheet = self.gc.open_by_url(self.spreadsheet_url)
+                self.spreadsheet = self.gc.open_by_key(self.spreadsheet_url)
                 return True
 
         except Exception as e:

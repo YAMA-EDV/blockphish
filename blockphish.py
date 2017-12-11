@@ -136,17 +136,14 @@ def handle_score_and_log(domain, watchdomain, score):
     global log
 
     if not log and google_spreadsheet_key and len(google_spreadsheet_key):
-        log = logging_methods.logging_methods(google_spreadsheet_key)
+        log = logging_methods.logging_methods(google_spreadsheet_key, config_name)
     elif not log:
-        log = logging_methods.logging_methods()
+        log = logging_methods.logging_methods(google_spreadsheet_key, config_name)
 
     log.console_log(domain, watchdomain, score)
     if google_spreadsheet_key and len(google_spreadsheet_key) > 0:
-        #google_sheets_queue.put((domain, watchdomain, score, google_drive_email, google_spreadsheet_key, google_threshold ))
-        log.google_sheets_log(domain, watchdomain, score, google_spreadsheet_key, google_threshold)
-        #p = Process(target=log.google_sheets_log, args=(domain, watchdomain,
-        # score, google_drive_email, google_spreadsheet_key, google_threshold,))
-        #p.start()
+        log.google_sheets_log(domain, watchdomain, score, google_spreadsheet_key, google_threshold, config_name)
+
 
 def callback(message, context):
     """Callback handler for certstream events."""
