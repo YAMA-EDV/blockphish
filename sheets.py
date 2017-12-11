@@ -3,7 +3,7 @@ from oauth2client.service_account import ServiceAccountCredentials
 from multiprocessing import Process
 from threading import Thread
 class sheets_api:
-    def __init__(self, spreadsheet_url, google_drive_email):
+    def __init__(self, spreadsheet_url):
         self.credentials = ServiceAccountCredentials.from_json_keyfile_name('credentials/creds.json',scopes=['https://spreadsheets.google.com/feeds','https://www.googleapis.com/auth/drive'])
         self.gc = gspread.authorize(self.credentials)
         self.spreadsheet_url = spreadsheet_url

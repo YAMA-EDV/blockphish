@@ -10,14 +10,13 @@ log_suspicious = 'suspicious_domains.log'
 pbar = tqdm.tqdm(desc='certificate_update', unit='cert')
 
 class logging_methods:
-    def __init__(self, google_drive_email=None, google_sheets_url=None):
-        if google_drive_email and google_sheets_url:
-            print (google_drive_email)
+    def __init__(self, google_sheets_url=None):
+        if google_sheets_url:
             print (google_sheets_url)
-            self.goog_sheets = sheets.sheets_api(google_sheets_url, google_drive_email)
+            self.goog_sheets = sheets.sheets_api(google_sheets_url)
         self.reported_domains = set()
 
-    def google_sheets_log(self, domain, watchdomain, score, google_drive_email, google_sheets_url, google_threshold):
+    def google_sheets_log(self, domain, watchdomain, score, google_sheets_url, google_threshold):
         '''
         This function is a wrapper for logging to google sheets.
 
@@ -39,7 +38,7 @@ class logging_methods:
 
         #check if we need to initialise google_sheets.
         if not self.goog_sheets:
-            self.goog_sheets = sheets.sheets_api(google_sheets_url, google_drive_email)
+            self.goog_sheets = sheets.sheets_api(google_sheets_url)
 
         top_level = extract(domain).registered_domain
         if auto_lookup_whois:

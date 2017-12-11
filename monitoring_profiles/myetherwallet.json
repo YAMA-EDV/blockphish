@@ -1,7 +1,7 @@
 {
   "config_name" : "MyEtherWallet",
 
-  "google_spreadsheet_key" : "",
+  "google_spreadsheet_key" : "12Jnp_AR6DWAKFs6F6AR1IpX3TweGp9qNvfs7XEbBzqc",
   "google_threshold" : 90,
 
   "watchlist" : {
