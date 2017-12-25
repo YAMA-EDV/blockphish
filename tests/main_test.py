@@ -102,7 +102,7 @@ class test_main(unittest.TestCase):
         self.assertGreater(score, 100, "domain in the watch_domain not flagging")
         
         # Check for similar but longer
-        domain = "payinpal.com"
+        domain = "pay-pal.com"
         watch_domain = "paypal.com"
         score = blockphish.score_domain(domain, watch_domain, {'paypal':80})
         print ("Domain: {} Watch Domain: {} Score: {}".format(domain, watch_domain, score))
@@ -127,7 +127,7 @@ class test_main(unittest.TestCase):
         watch_domain = "paypal.com"
         score = blockphish.score_domain(domain, watch_domain, {'asdfaaadsf':80})
         print ("Domain: {} Watch Domain: {} Score: {}".format(domain, watch_domain, score))
-        self.assertLess(score, 60, "domain in the watch_domain not flagging")
+        self.assertLess(score, 50, "domain in the watch_domain not flagging")
 
         # Check for no match
         domain = "whiteoleanderphotography.com"

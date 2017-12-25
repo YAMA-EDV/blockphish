@@ -34,11 +34,15 @@ def score_domain(target_domain, watch_domain, keywords):
     :param watch_domain: whether the CA of the certificate is Let's Encrypt
     :return: the score of the domain in question.
     '''
-    # Check to see if IDNA encoded - normally suspicious if so
+
     score = 0
 
     target_domain = clean_domain(target_domain)
     watch_domain = clean_domain(watch_domain)
+
+    # If the target domain is the watch domain, don't score it
+    if target_domain == watch_domain:
+        return 0
 
     try:
         target_domain.encode('ascii')
@@ -48,17 +52,13 @@ def score_domain(target_domain, watch_domain, keywords):
 
     target_domain = unidecode(target_domain)
 
-    # If the target domain is the watch domain, don't score it
-    if target_domain == watch_domain:
-        return 0
-
-    # If the parsed target domain is the watch domain, but with a different TLD, very suspicious
+    # If the parsed target domain is the parsed watch domain, but with a different TLD, very suspicious
     if remove_tld(watch_domain) == remove_tld(target_domain):
         return 100
 
-    # If the parsed watch domain is in the target domain, but they aren't equal, suspicious
-    if remove_tld(watch_domain) in target_domain:
-        score = 70
+    # If the watch domain is in the target domain, but they aren't equal, suspicious
+    if watch_domain in target_domain:
+        return 100
 
     # If they have a low levenshtein distance, suspicious
     l_distance = Levenshtein.distance(remove_tld(watch_domain),remove_tld(target_domain))
@@ -66,15 +66,11 @@ def score_domain(target_domain, watch_domain, keywords):
 
     # Works for both short and long strings
     if l_distance <= 2:
-        score = 70 + 10 * (2-l_distance)
+        score = 50 + 25 * (2-l_distance)
     # Better with longer strings
     elif fuzz_ratio > 80:
         score = fuzz_ratio - 25
-
-    # If the watch domain is in the target domain, but they aren't equal, suspicious
-    if watch_domain in target_domain:
-        return 100
-
+    
     # TODO: keyword functionality is temporarily disabled
     # score += fuzzy_scorer_keywords(keywords, remove_tld(target_domain))
     # print(fuzzy_scorer_keywords(keywords, remove_tld(target_domain)))
@@ -85,8 +81,8 @@ def score_domain(target_domain, watch_domain, keywords):
     # If the target domain is much shorter than the watch domain, it's probably not much of a threat
     if target_len > watch_len / 2 and target_len > 4:
         # Detect the presence of the watch domain in the target domain
-        score += fuzzy_scorer_domain(remove_tld(watch_domain), remove_tld(target_domain)) * 0.95
-
+        score += fuzzy_scorer_domain(remove_tld(watch_domain), remove_tld(target_domain))
+        
     # Detect suspicious domain structure
     # Remove initial '*.' for wildcard certificates
     if target_domain.startswith('*.'):

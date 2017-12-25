@@ -101,28 +101,33 @@ def fuzzy_scorer_domain(domain, target):
 
     score = 0
 
-    # Find the shorter string
-    shorter,longer = (domain,target) if len(domain) < len(target) else (target,domain)
+    # The watch domain is shorter than the target domain, so use a sliding window
+    if len(domain) < len(target):
+        shorter,longer = (domain,target) 
+            # Set the window length equal to the shorter string
+        window_length = len(shorter)
 
-    # Set the window length equal to the shorter string
-    window_length = len(shorter)
+        # Set the number of times to move the window
+        num_iterations = len(longer)-len(shorter)+1
 
-    # Set the number of times to move the window
-    num_iterations = len(longer)-len(shorter)+1
+        # Find the Levenshtein distance
+        for position in range(0, num_iterations):
+            window = longer[position:position+window_length]
+            l_ratio = Levenshtein.ratio(window, shorter) * 100
 
-    # Find the Levenshtein distance
-    for position in range(0, num_iterations):
-        window = longer[position:position+window_length]
-        l_ratio = Levenshtein.ratio(window, shorter) * 100
-
-        if l_ratio > 60:
-            result = statistics.mean([100 - Levenshtein.distance(window, shorter) * 10, l_ratio, l_ratio])
-        else:
-            result = l_ratio
-        if result > score:
-            score = result
-
-    simple = fuzz.ratio(domain, target)
+            if l_ratio > 60:
+                result = statistics.mean([100 - Levenshtein.distance(window, shorter) * 15, l_ratio, l_ratio])
+            else:
+                result = l_ratio
+            if result > score:
+                score = result
+                
+    # The target domain is shorter, so just use a single measurement
+    else: 
+        l_ratio = Levenshtein.ratio(domain, target) * 100
+        score = statistics.mean([100 - Levenshtein.distance(domain, target) * 15, l_ratio, l_ratio])
+    
+    simple = fuzz.ratio(domain, target) 
     partial = fuzz.partial_ratio(domain, target)
     sort = fuzz.token_sort_ratio(domain, target)
     set_ratio = fuzz.token_set_ratio(domain, target)
@@ -133,7 +138,7 @@ def fuzzy_scorer_domain(domain, target):
     if score < 75:
         score = 0
 
-    return score * 0.90
+    return score * 0.85
 
 def fuzzy_scorer_keywords(keywords, target):
     '''
