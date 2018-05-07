@@ -28,6 +28,11 @@ You will need the following python packages installed:
 * fuzzywuzzy
 * pythonwhois
 
+On the host, you will need to install:
+
+* python3-tk
+* PhantomJS executable must be in PATH. (If you're using an UBUNTU distro, we recommend downloading (the source directly)[ https://bitbucket.org/ariya/phantomjs/downloads/phantomjs-2.1.1-linux-x86_64.tar.bz2] and copying bin/phantomjs into /usr/bin/phantomjs.
+
 To install the packages run:
 
 ```sh
