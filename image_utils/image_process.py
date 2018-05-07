@@ -61,7 +61,7 @@ class image_utils:
         new_image = '/tmp/{}.jpg'.format(randint(0,1000000000))
 
         alpha_composite = Image.alpha_composite(background, png)
-        alpha_composite.convert("RGB")
+        alpha_composite = alpha_composite.convert("RGB")
         alpha_composite.save(new_image, 'JPEG', quality=quality)
         return new_image
 
@@ -76,6 +76,6 @@ class image_utils:
         img = img.crop((0, 0, size[0], size[1]))
         img_name = '/tmp/{}.jpg'.format(str(randint(0,10000000000)))
         print("saved cropped image to {}".format(img_name))
-        img.convert("RGB")
+        img = img.convert("RGB")
         img.save(img_name)
         return img_name
