@@ -11,7 +11,7 @@
 # GNU General Public License for more details.
 import certstream
 from default_settings import bad_repuation_tlds
-from utils import clean_domain, remove_tld, fuzzy_scorer_domain, fuzzy_scorer_keywords, is_whitelisted
+from utils import html_comparison, clean_domain, remove_tld, fuzzy_scorer_domain, fuzzy_scorer_keywords, is_whitelisted
 import logging_methods
 from queue import Queue
 import threading
@@ -70,7 +70,7 @@ def score_domain(target_domain, watch_domain, keywords):
     # Better with longer strings
     elif fuzz_ratio > 80:
         score = fuzz_ratio - 25
-    
+
     # TODO: keyword functionality is temporarily disabled
     # score += fuzzy_scorer_keywords(keywords, remove_tld(target_domain))
     # print(fuzzy_scorer_keywords(keywords, remove_tld(target_domain)))
@@ -82,7 +82,7 @@ def score_domain(target_domain, watch_domain, keywords):
     if target_len > watch_len / 2 and target_len > 4:
         # Detect the presence of the watch domain in the target domain
         score += fuzzy_scorer_domain(remove_tld(watch_domain), remove_tld(target_domain))
-        
+
     # Detect suspicious domain structure
     # Remove initial '*.' for wildcard certificates
     if target_domain.startswith('*.'):
@@ -166,7 +166,6 @@ def callback(message, context):
                 # More suspicious if it's issued by a free CA
                 if "Let's Encrypt" in message['data']['chain'][0]['subject']['aggregated']:
                     score += 20
-
                 handle_score_and_log(clean_domain(domain), clean_domain(watch_domain), score)
 
 

@@ -3,7 +3,10 @@ import pythonwhois
 import statistics
 import Levenshtein
 from fuzzywuzzy import fuzz
-
+import requests
+from expiringdict import ExpiringDict
+from html_similarity import similarity
+html_cache = ExpiringDict(max_len=10000, max_age_seconds=(60*60)*24)
 
 def clean_domain(domain):
     '''
@@ -103,7 +106,7 @@ def fuzzy_scorer_domain(domain, target):
 
     # The watch domain is shorter than the target domain, so use a sliding window
     if len(domain) < len(target):
-        shorter,longer = (domain,target) 
+        shorter,longer = (domain,target)
             # Set the window length equal to the shorter string
         window_length = len(shorter)
 
@@ -121,13 +124,13 @@ def fuzzy_scorer_domain(domain, target):
                 result = l_ratio
             if result > score:
                 score = result
-                
+
     # The target domain is shorter, so just use a single measurement
-    else: 
+    else:
         l_ratio = Levenshtein.ratio(domain, target) * 100
         score = statistics.mean([100 - Levenshtein.distance(domain, target) * 15, l_ratio, l_ratio])
-    
-    simple = fuzz.ratio(domain, target) 
+
+    simple = fuzz.ratio(domain, target)
     partial = fuzz.partial_ratio(domain, target)
     sort = fuzz.token_sort_ratio(domain, target)
     set_ratio = fuzz.token_set_ratio(domain, target)
@@ -217,3 +220,33 @@ def watchdomain_in_domain(new_domain, watchdomain):
     # Nothing to see here.
     else:
         return False
+
+def html_comparison(goodurl, badurl):
+    if not goodurl.startswith("http://"):
+        goodurl = "http://" + goodurl
+
+    if not badurl.startswith("http://"):
+        badurl = "http://" + badurl
+
+    goodpage_html = html_cache.get(goodurl)
+    badpage_html = html_cache.get(badurl)
+    if not goodpage_html:
+        try:
+            r = requests.get(goodurl)
+            html_cache[goodurl] = r.text
+        except Exception as error:
+            return (False, error)
+
+    if not badpage_html:
+        try:
+            r = requests.get(badurl)
+            html_cache[badurl] = r.text
+        except Exception as error:
+            return (False, error)
+
+    #try:
+    print("Testing {} {}".format(goodpage_html, badpage_html))
+    sim = similarity(goodpage_html, badpage_html)
+    return (True, sim)
+#except Exception as error:
+    return (False, error)
