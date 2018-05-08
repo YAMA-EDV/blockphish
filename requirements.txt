@@ -7,6 +7,7 @@ gspread==0.6.2
 fuzzywuzzy==0.15.1
 unidecode==0.04.21
 pythonwhois==2.4.3
+tldextract
 scikit-image
 html-similarity
 expiringdict
