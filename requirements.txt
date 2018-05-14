@@ -12,3 +12,4 @@ scikit-image
 html-similarity
 expiringdict
 selenium
+oauth2client

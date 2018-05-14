@@ -4,25 +4,7 @@ sys.path.append('../')
 import blockphish
 
 class test_main(unittest.TestCase):
-    '''
-    def test_domain_word_split(self):
-        domain1 = "paypal-account.com"
-        words = blockphish.split_domain_into_words(domain1)
-        self.assertEqual(words, sorted(['paypal', 'account']))
-
-        domain2 = "paypal.paypal.com.phishing.co.za"
-        words = blockphish.split_domain_into_words(domain2)
-        self.assertEqual(words, sorted(['paypal', 'phishing']))
     
-    def test_domain_in_watchdomain(self):
-        domain = "paypal.com.domain.com"
-        watch_domain = "paypal.com"
-        self.assertTrue(blockphish.watchdomain_in_domain(domain, watch_domain))
-
-        domain = "otherdomain.com"
-        watch_domain = "paypal.com"
-        self.assertFalse(blockphish.watchdomain_in_domain(domain, watch_domain))
-    '''
     def test_score_domain(self):
 
         domain = "paypal.com"
@@ -213,14 +195,12 @@ class test_main(unittest.TestCase):
         print ("Domain: {} Watch Domain: {} Score: {}".format(domain, watch_domain, score))
         self.assertLess(score, 50, "domain in the watch_domain not flagging")
        
-        '''
-         # Check for similar but longer
-        domain = "ilovepeypel.com"
+        domain = "Thṛomas.ga"
         watch_domain = "paypal.com"
-        score = blockphish.score_domain(domain, watch_domain, {'paypal':80})
+        score = blockphish.score_domain(domain, watch_domain, {'paypal':75, 'paypalcorp': 50})
         print ("Domain: {} Watch Domain: {} Score: {}".format(domain, watch_domain, score))
-        self.assertGreater(score, 60, "domain in the watch_domain not flagging")
-        '''
+        self.assertLess(score, 50, "domain in the watch_domain not flagging")
+       
         
 def main():
     unittest.main()

@@ -46,7 +46,7 @@ def score_domain(target_domain, watch_domain, keywords):
 
     try:
         target_domain.encode('ascii')
-    except UnicodeEncodeError:
+    except:
         # Contains unicode, suspicious
         score+=20
 

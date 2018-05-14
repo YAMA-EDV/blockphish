@@ -28,7 +28,15 @@ class test_main(unittest.TestCase):
         page2 = r.render_webpage("http://myetherwallwt.com/")
         similarity = improc.image_similarity(page1, page2)
         print("Similarity between phishing page + mew {}".format(similarity))
-
+    
+    def test_website_blank_comparison(self):
+        r = website_render.website_render()
+        page1 = r.render_webpage("https://iosiro.com")
+        page2 = r.render_webpage("https://thisdoesntexist3432415.com")
+        improc = image_process.image_utils()
+        similarity = improc.image_similarity(page1, page1)
+        print("Similarity between iosiro + iosiro {}".format(similarity))
+        self.assertNotEqual(0.0, similarity)
 
 def main():
     unittest.main()
