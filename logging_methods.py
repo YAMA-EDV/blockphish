@@ -7,17 +7,21 @@ from tldextract import extract
 from default_settings import auto_lookup_whois
 from multiprocessing import Process
 from image_utils import image_process
+import requests
 
 log_suspicious = 'suspicious_domains.log'
 pbar = tqdm.tqdm(desc='certificate_update', unit='cert')
 
 class logging_methods:
-    def __init__(self,google_spreadsheet_key, config_name):
+    def __init__(self,google_spreadsheet_key, log_to_cloud_functions, config_name):
         if google_spreadsheet_key:
             print (google_spreadsheet_key)
             self.goog_sheets = sheets.sheets_api(google_spreadsheet_key, config_name)
         self.reported_domains = set()
         self.im_util = image_process.image_utils()
+
+    def report_cloud_function(self, cloudfunctions_url, domain, watchdomain, score):
+        r = requests.post(cloudfunctions_url, json = {"domain" : domain, "safeDomain" : watchdomain, "score" : score, "reasoning" : "Flagged as similar by SSL stream."})
 
     def google_sheets_log(self, domain, watchdomain, score, google_sheets_url, google_threshold, config_name):
         '''
@@ -48,7 +52,6 @@ class logging_methods:
             whois_data = whois_lookup(top_level)
         else:
             whois_data = "https://www.godaddy.com/whois/results.aspx?checkAvail=1&tmskey=&domain={}&prog_id=GoDaddy".format(domain)
-
 
         visual_similarity = self.im_util.compare_website_visually("http://" + domain, "http://" + watchdomain)
         print (visual_similarity)

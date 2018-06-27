@@ -7,8 +7,12 @@
   "watchlist" : {
     "paypal.com": {
       "paypalcorp": 25
-    }
-  },
+    },
+    "ü": {
+  	"m" : 12
+	}
+
+  	},
 
   "whitelisted_domains" : ["paypal.com"]
 }

@@ -45,6 +45,7 @@ tmtagsHistory
 .credentials
 credentials/creds.json
 dev_settings.py
+settings.py
 
 #TLDS
 .tlds

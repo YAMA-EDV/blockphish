@@ -132,11 +132,14 @@ def handle_score_and_log(domain, watchdomain, score):
     global log
 
     if not log and google_spreadsheet_key and len(google_spreadsheet_key):
-        log = logging_methods.logging_methods(google_spreadsheet_key, config_name)
+        log = logging_methods.logging_methods(google_spreadsheet_key,cloudfunctions_url, config_name)
     elif not log:
-        log = logging_methods.logging_methods(google_spreadsheet_key, config_name)
+        log = logging_methods.logging_methods(google_spreadsheet_key,cloudfunctions_url, config_name)
 
     log.console_log(domain, watchdomain, score)
+    if cloudfunctions_url:
+        log.report_cloud_function(cloudfunctions_url, domain, watchdomain, score)
+
     if google_spreadsheet_key and len(google_spreadsheet_key) > 0:
         log.google_sheets_log(domain, watchdomain, score, google_spreadsheet_key, google_threshold, config_name)
 
@@ -168,12 +171,15 @@ def callback(message, context):
                     score += 20
                 handle_score_and_log(clean_domain(domain), clean_domain(watch_domain), score)
 
+def on_error(instance, exception):
+    # Instance is the CertStreamClient instance that barfed
+    print("Exception in CertStreamClient! -> {}".format(exception))
 
 def main(config_file):
     load_config_file(config_file)
     # Start streaming certificates
     print ("Starting to stream certificates... this can take a few minutes...")
-    certstream.listen_for_events(callback)
+    certstream.listen_for_events(callback, on_error=on_error)
     print()
 
 if __name__ == "__main__":
