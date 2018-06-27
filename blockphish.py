@@ -138,7 +138,7 @@ def handle_score_and_log(domain, watchdomain, score):
 
     log.console_log(domain, watchdomain, score)
     if cloudfunctions_url:
-        log.report_cloud_function(cloudfunctions_url, domain, watchdomain, score)
+        log.report_cloud_function(cloudfunctions_url, domain, watchdomain, score, google_threshold)
 
     if google_spreadsheet_key and len(google_spreadsheet_key) > 0:
         log.google_sheets_log(domain, watchdomain, score, google_spreadsheet_key, google_threshold, config_name)

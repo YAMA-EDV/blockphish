@@ -20,8 +20,9 @@ class logging_methods:
         self.reported_domains = set()
         self.im_util = image_process.image_utils()
 
-    def report_cloud_function(self, cloudfunctions_url, domain, watchdomain, score):
-        r = requests.post(cloudfunctions_url, json = {"domain" : domain, "safeDomain" : watchdomain, "score" : score, "reasoning" : "Flagged as similar by SSL stream."})
+    def report_cloud_function(self, cloudfunctions_url, domain, watchdomain, score, google_threshold):
+        if score > google_threshold:
+            r = requests.post(cloudfunctions_url, json = {"domain" : domain, "safeDomain" : watchdomain, "score" : score, "reasoning" : "Flagged as similar by SSL stream."})
 
     def google_sheets_log(self, domain, watchdomain, score, google_sheets_url, google_threshold, config_name):
         '''
