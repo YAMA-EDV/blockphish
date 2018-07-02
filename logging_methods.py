@@ -21,6 +21,10 @@ class logging_methods:
         self.im_util = image_process.image_utils()
 
     def report_cloud_function(self, cloudfunctions_url, domain, watchdomain, score, google_threshold):
+        if domain in self.reported_domains or domain.strip("www.") in self.reported_domains:
+            return
+        else:
+            self.reported_domains.add(domain)
         if score > google_threshold:
             r = requests.post(cloudfunctions_url, json = {"domain" : domain, "safeDomain" : watchdomain, "score" : score, "reasoning" : "Flagged as similar by SSL stream."})
 
