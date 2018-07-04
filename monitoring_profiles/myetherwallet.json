@@ -3,9 +3,6 @@
 
   "google_spreadsheet_key" : "12Jnp_AR6DWAKFs6F6AR1IpX3TweGp9qNvfs7XEbBzqc",
   "google_threshold" : 90,
-
-  "cloudfunctions_url" : "https://us-central1-counter-phishing.cloudfunctions.net/saveIncidentToCloudstore",
-
   "watchlist" : {
     "myetherwallet.com": {
       "myetherwallet": 100, "myether": 50
