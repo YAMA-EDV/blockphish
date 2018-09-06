@@ -26,7 +26,7 @@ class logging_methods:
         else:
             self.reported_domains.add(domain)
         if score > google_threshold:
-            r = requests.post(cloudfunctions_url, json = {"domain" : domain, "safeDomain" : watchdomain, "score" : score, "reasoning" : "Flagged as similar by SSL stream."})
+            r = requests.post(cloudfunctions_url, json = {"domain" : domain, "safeDomain" : watchdomain, "score" : score, "reasoning" : "Flagged as similar by SSL stream.", "source" : "blockphish"})
 
     def google_sheets_log(self, domain, watchdomain, score, google_sheets_url, google_threshold, config_name):
         '''
