@@ -1,5 +1,4 @@
 from tldextract import extract, TLDExtract
-import pythonwhois
 import statistics
 import Levenshtein
 from fuzzywuzzy import fuzz
@@ -36,7 +35,7 @@ def is_whitelisted(domain, whitelist):
 
 def whois_lookup(domain):
     try:
-        whois_data = pythonwhois.net.get_whois_raw(domain)
+        #whois_data = pythonwhois.net.get_whois_raw(domain)
         if len(whois_data) > 0:
             return whois_data[0]
     except:

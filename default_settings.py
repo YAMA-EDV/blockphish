@@ -42,3 +42,7 @@ bad_repuation_tlds = [
     '.online',
     '.club'
 ]
+
+external_analysis = False
+external_analysis_url = "http://localhost:25534/testDomain"
+cloudfunctions_url = False

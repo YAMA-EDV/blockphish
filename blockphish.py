@@ -10,7 +10,7 @@
 # MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 # GNU General Public License for more details.
 import certstream
-from default_settings import bad_repuation_tlds
+from default_settings import bad_repuation_tlds, external_analysis, external_analysis_url, cloudfunctions_url
 from utils import html_comparison, clean_domain, remove_tld, fuzzy_scorer_domain, fuzzy_scorer_keywords, is_whitelisted
 import logging_methods
 from queue import Queue
@@ -18,6 +18,7 @@ import threading
 import time
 import Levenshtein
 from fuzzywuzzy import fuzz
+import requests
 import sys
 from multiprocessing import Process
 from unidecode import unidecode
@@ -157,6 +158,13 @@ def callback(message, context):
 
             #Is the domain whitelisted
             if is_whitelisted(domain, whitelisted_domains):
+                continue
+
+            if external_analysis:
+                x = requests.get(external_analysis_url+"?domain={}".format(clean_domain(domain)))
+                print (json.loads(x.text))
+                if json.loads(x.text)['similarity'] > 0.5:
+                    handle_score_and_log(clean_domain(domain), clean_domain(json.loads(x)['target']), json.loads(x)['similarity'])
                 continue
 
             # Loop through each of the domains that we're watching
