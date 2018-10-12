@@ -139,7 +139,7 @@ def handle_score_and_log(domain, watchdomain, score):
 
     log.console_log(domain, watchdomain, score)
     if cloudfunctions_url:
-        log.report_cloud_function(cloudfunctions_url, domain, watchdomain, score, google_threshold)
+        log.report_cloud_function(cloudfunctions_url, domain, watchdomain, score, 0)
 
     if google_spreadsheet_key and len(google_spreadsheet_key) > 0:
         log.google_sheets_log(domain, watchdomain, score, google_spreadsheet_key, google_threshold, config_name)
@@ -163,8 +163,8 @@ def callback(message, context):
             if external_analysis:
                 x = requests.get(external_analysis_url+"?domain={}".format(clean_domain(domain)))
                 print (json.loads(x.text))
-                if json.loads(x.text)['similarity'] > 0.5:
-                    handle_score_and_log(clean_domain(domain), clean_domain(json.loads(x)['target']), json.loads(x)['similarity'])
+                if json.loads(x.text)['score'] > 0.5:
+                    handle_score_and_log(clean_domain(domain), clean_domain(json.loads(x.text)['target']), json.loads(x.text)['similarity'])
                 continue
 
             # Loop through each of the domains that we're watching
@@ -187,6 +187,8 @@ def main(config_file):
     load_config_file(config_file)
     # Start streaming certificates
     print ("Starting to stream certificates... this can take a few minutes...")
+    print("sending test")
+    callback({'message_type' : "certificate_update", 'data' : {'leaf_cert' : {'all_domains' : ["myethrwallet.com"] }}}, {})
     certstream.listen_for_events(callback, on_error=on_error)
     print()
 
@@ -195,3 +197,4 @@ if __name__ == "__main__":
         print ("\nUsage: python3 blockphish.py monitoring_profiles/<profile>.json")
         sys.exit()
     main(sys.argv[1])
+    

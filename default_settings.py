@@ -43,6 +43,6 @@ bad_repuation_tlds = [
     '.club'
 ]
 
-external_analysis = False
+external_analysis = True
 external_analysis_url = "http://localhost:25534/testDomain"
-cloudfunctions_url = False
+cloudfunctions_url = "https://us-central1-counter-phishing.cloudfunctions.net/saveIncidentToCloudstoreUpdated"
